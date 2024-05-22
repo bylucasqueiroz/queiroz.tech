@@ -1,0 +1,75 @@
+[
+    {
+        "company": "Itaú Unibanco",
+        "role": "Senior Software Engineer",
+        "descriptions": [
+            "Designed and implemented critical microservice applications for banking transactions, ensuring performance and high availability for 28 million financial transactions daily. Leveraged the latest technologies from Amazon Web Services, including C#, .NET, Python, GitHub Actions, DynamoDB, Apache Kafka, SQS, SNS, and Terraform.",
+            "Responsible for designing, implementing, and maintaining architectures and applications using Go (GoLang), Kubernetes, Docker within a cell-based architecture deployed on AWS. Utilized EC2, EKS, Kafka, SQS, SNS, and DynamoDB.",
+            "Architected scalable APIs on AWS, utilizing API Gateway, AWS Fargate, and AWS Lambda to support internal systems and various squads. Developed worker services for system optimization using C#, .NET, and Docker.",
+            "Led initiatives to modernize projects, transitioning from On-Premises to AWS infrastructure. Conducted maintenance on legacy code and managed databases to sustain operational efficiency."
+        ],
+        "startAt": "2022",
+        "endAt": "Present",
+        "skills": "Golang, C#, Microsoft .NET, Python, Amazon Web Services (AWS), Kubernetes, Apache Kafka, MySQL, SQL, Angular"
+    },
+    {
+        "company": "BTG Pactual",
+        "role": "Backend Engineer",
+        "descriptions": [
+            "Implemented worker services processing millions of financial transactions daily, ensuring alignment with expected standards. Used C#, .NET, Python, Amazon Web Services, Docker, Azure DevOps Services, and MySQL.",
+            "Developed APIs consuming processed transactions, defining transaction inconsistencies using .NET and MySQL. These APIs served the Frontend accessed by financial analysis teams.",
+            "Led the creation and maintenance of the Frontend built in Angular, aiming to enhance the visualization of processed data and improve the overall user experience."
+        ],
+        "startAt": "2021",
+        "endAt": "2022",
+        "skills": "C#, .NET Core, Python, Amazon Web Services (AWS), JavaScript, Azure DevOps Services, DynamoDB, HTML5, CSS, MySQL, Angular"
+    },
+    {
+        "company": "Educa Mais Brasil",
+        "role": "Systems Analyst",
+        "descriptions": [
+            "Developed scalable APIs for integrating with external systems from partner companies to consume student scholarship data. Marketed partner-provided data on our student scholarship platform using C#, .NET Core, Entity Framework, ASP.NET Web API, Oracle Database, and PL/SQL.",
+            "Maintained APIs with legacy code and implemented new solutions to introduce additional features to existing systems in C#, .NET Framework, and Oracle Database.",
+            "Implemented new features in sales administration tools for student scholarships used by sales teams using Angular. Enhanced existing sales portals to improve the overall customer experience.",
+            "The applications were implemented using some project standards such as SOLID, DDD, Clean Architecture, and Clean Code."
+        ],
+        "startAt": "2020",
+        "endAt": "2021",
+        "skills": "C#, .NET Core, .NET Framework, Entity Framework, JavaScript, Oracle Database, PL/SQS, TFS, ASP.NET Web API, HTML5, CSS, Angular"
+    },
+    {
+        "company": "Solutis Tecnologia",
+        "role": "Developer",
+        "descriptions": [
+            "Designed and implemented financial data processing APIs for clients in the Water and Sanitation sector in Bahia, Brazil, using technologies such as C#, .NET, and IBM DB2. Employed best practices and project standards, including Test-Driven Development (TDD) and Command Query Responsibility Segregation (CQRS).",
+            "Enhanced features within the dashboard for managing indicators, organizing and displaying data processed by the API. Developed interfaces using JavaScript and React."
+        ],
+        "startAt": "2019",
+        "endAt": "2020",
+        "skills": "C#, .NET Core, JavaScript, Entity Framework (EF) Core, ASP.NET Web API, IBM Db2, HTML5, CSS, React.js"
+    },
+    {
+        "company": "Shopping Piedade",
+        "role": "IT Assistant",
+        "descriptions": [
+            "Streamlined administrative processes by developing systems that seamlessly integrate with existing frameworks using technologies like C#, Microsoft .NET Core, Entity Framework, Microsoft SQL Server, and MVC to optimize the delivery of invoices to customers.",
+            "Orchestrated the administration of the computer network, leveraging Windows Server, to regulate internal user access.",
+            "Headed the support team overseeing the IT infrastructure, ensuring seamless operations and optimal performance.",
+            "Oversaw third-party systems integral to employee workflows, guaranteeing their functionality and actively managed databases utilizing Microsoft SQL Server."
+        ],
+        "startAt": "2018",
+        "endAt": "2019",
+        "skills": "C#, .NET Core, Entity Framework, Microsoft SQL Server, HTML5, CSS"
+    },
+    {
+        "company": "Shopping Piedade",
+        "role": "IT Intern",
+        "descriptions": [
+            "Contributed to the seamless operation of the IT infrastructure by conducting maintenance, implementing hardware adjustments, and delivering support for existing applications.",
+            "Developed simple applications customized to internal requirements using tools such as C#, ASP.NET, and Microsoft SQL Server."
+        ],
+        "startAt": "2018",
+        "endAt": "2017",
+        "skills": "C#, .NET Core, Entity Framework, Microsoft SQL Server, HTML5, CSS"
+    }
+]

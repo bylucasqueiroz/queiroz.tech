@@ -48,7 +48,7 @@ export async function getViewsCount(): Promise<
   `;
 }
 
-export const getLeeYouTubeSubs = cache(
+export const getLucasYouTubeSubs = cache(
   async () => {
     let response = await yt.channels.list({
       id: ['UCZMli3czZnd1uoc1ShTouQw'],
@@ -58,7 +58,7 @@ export const getLeeYouTubeSubs = cache(
     let channel = response.data.items![0];
     return Number(channel?.statistics?.subscriberCount).toLocaleString();
   },
-  ['leerob-youtube-subs'],
+  ['lucas-youtube-subs'],
   {
     revalidate: 3600,
   }
