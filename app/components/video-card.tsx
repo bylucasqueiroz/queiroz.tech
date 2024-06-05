@@ -13,7 +13,7 @@ export default function VideoCard({ href, length, title, index }) {
               <div className="text-gray-300 dark:text-gray-400 text-left mr-6">
                 {index}
               </div>
-              <h4 className="text-lg font-medium w-full text-gray-800 dark:text-gray-100">
+              <h4 className="text-base font-medium w-full text-gray-800 dark:text-gray-100">
                 {title}
               </h4>
             </div>
