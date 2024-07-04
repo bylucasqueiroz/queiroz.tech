@@ -9,7 +9,7 @@ import {
   stylexApp,
   stylexViteConfig,
   stylexTokens,
-} from './sandpack-files';
+} from './SandpackFiles';
 import React, { Suspense } from 'react';
 
 class ErrorBoundary extends React.Component<

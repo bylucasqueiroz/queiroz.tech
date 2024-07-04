@@ -6,7 +6,7 @@ import {
   TweetNotFound,
   type TweetProps,
 } from 'react-tweet';
-import './tweet.css';
+import './Tweet.css';
 
 const TweetContent = async ({ id, components, onError }: TweetProps) => {
   let error;

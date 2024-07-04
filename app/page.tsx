@@ -1,7 +1,11 @@
-import VideoCard from "./components/video-card";
+import VideoCard from "./components/VideoCard";
 import Image from 'next/image';
+import BlogPostCard from "./components/BlogPost";
+import { getBlogPosts } from "./db/blog";
 
 export default function Page() {
+  let allPosts = getBlogPosts()
+  const lastThreePosts = allPosts.slice(0, 3);
   return (
     <section>
       <div className="flex flex-col-reverse sm:flex-row items-start">
@@ -28,14 +32,44 @@ export default function Page() {
           />
         </div>
       </div>
-      <p className="prose prose-neutral dark:prose-invert">
-        I'm a software engineer, graduated in Computer Engineer, passionate about technology,
-        coding and problem-solving.
-      </p>
-      <h3 className="font-medium text-xl mb-4 mt-16 tracking-tighter">
-        Last Youtube Videos
+      <h3 className="font-bold text-2xl md:text-4xl tracking-tight mb-6 text-black dark:text-white">
+        Last Posts
       </h3>
-      <p className="prose prose-neutral dark:prose-invert mb-2">
+      <div className="flex gap-6 flex-col md:flex-row">
+        {lastThreePosts.map((post) => (
+          <BlogPostCard
+            key={post.slug}
+            title={post.metadata.title}
+            slug={post.slug}
+            gradient="from-[#D3D3D3] to-[#57606F]"
+          />
+        ))}
+      </div>
+      <a
+        rel="noopener noreferrer"
+        href="/blog"
+        className="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg hover:text-gray-800 dark:hover:text-gray-200 transition-all h-6"
+      >
+        Read all
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          className="h-6 w-6 ml-1"
+        >
+          <path
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17.5 12h-15m11.667-4l3.333 4-3.333-4zm3.333 4l-3.333 4 3.333-4z"
+          />
+        </svg>
+      </a>
+      <h3 className="font-bold text-2xl md:text-4xl tracking-tight mb-6 mt-16 text-black dark:text-white">
+        Last Videos
+      </h3>
+      <p className="text-gray-600 dark:text-gray-400 mb-2">
         I take great pleasure in sharing my knowledge and experiences with others.
         That's why I created this channel. Here are three of my latest videos that
         I hope you'll find informative and enjoyable:
@@ -64,7 +98,7 @@ export default function Page() {
         href="https://www.youtube.com/@bylucasqueiroz"
         className="flex mt-8 text-gray-600 dark:text-gray-400 leading-7 rounded-lg hover:text-gray-800 dark:hover:text-gray-200 transition-all h-6"
       >
-        Watch all videos
+        Watch all
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
