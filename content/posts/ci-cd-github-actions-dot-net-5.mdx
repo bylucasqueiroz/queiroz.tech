@@ -1,0 +1,302 @@
+---
+title: CI/CD no Github Actions em aplicações .NET 5 com Docker
+description: Configurando CI/CD no Github Actions em aplicações .NET 5 com Docker.
+date: '2020-12-18'
+---
+
+Fala pessoal! Sabemos a quantidade de benefícios que encontramos 
+com a implementação de CI/CD, integração contínua em projetos, 
+e o quanto melhora a qualidade das entregas.
+
+Neste artigo você verá a implementação de algumas etapas do CI/CD 
+no Github Actions, utilizando .NET 5. Você vai ver que é bem simples 
+a implementação básica, mas não pare neste artigo, você pode implementar 
+muitos outros flows além destes.
+
+## 1. Estruturando o Projeto
+
+Vamos criar uma WebApi simples que exibe alguns dados de cores. 
+Também adicionaremos um projeto de testes com XUnit, utilizaremos 
+também esse projeto como um dos flows do CI/CD.
+
+### 1.1. Criando Solução
+
+```bash
+dotnet new sln -n Colors
+```
+
+### 1.2. Adicionando a WebApi
+
+```bash
+dotnet new webapi -n Colors.WebApi
+```
+
+### 1.3. Adicionando Projeto de Testes
+
+```bash
+dotnet new xunit -n Colors.Tests
+```
+
+### 1.4. Integrando projetos a solução
+
+```bash
+dotnet sln add .\Colors.WebApi\Colors.WebApi.csproj
+dotnet sln add .\Colors.Tests\Colors.Tests.csproj
+```
+
+### 1.5. Por fim restauramos o projeto
+
+```bash
+dotnet restore
+dotnet build Colors.sln
+```
+
+## 2. Implementação da WebApi
+
+Implementei uma api simples com um repositório de cores, que realiza get e 
+retorna cores. E alguns testes simples. A estrutura do projeto ficou assim:
+
+### 2.1. ColorController
+
+```csharp title="ColorController.cs"
+using System.Linq;
+using Colors.WebApi.Repositories;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Colors.WebApi.Controllers
+{
+    [ApiController]
+    [Route("api/colors")]
+    public class ColorController : ControllerBase
+    {
+        [HttpGet]
+        public IActionResult GetAllColors()
+        {
+            var colors = ColorsRepository.Get();
+            return Ok(colors);
+        }
+        [HttpGet("{name}")]
+        public IActionResult GetByName(string name)
+        {
+            var colors = ColorsRepository.Get();
+            var response = colors.Where(x => 
+                     x.Name.ToLower() == name.ToLower())
+                     .FirstOrDefault();
+            return Ok(response);
+        }
+    }
+}
+```
+
+### 2.2. Model Color
+
+```csharp title="Color.cs"
+namespace Colors.WebApi.Models
+{
+    public class Color
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+}
+```
+
+### 2.3. Repositório — ColorRepository.
+
+```csharp title="ColorRepository.cs"
+using System.Collections.Generic;
+using Colors.WebApi.Models;
+
+namespace Colors.WebApi.Repositories
+{
+    public static class ColorsRepository
+    {
+        public static List<Color> Get()
+        {
+            var colors = new List<Color>();
+            colors.Add(new Color { Id = 1, Name = "Red" });
+            colors.Add(new Color { Id = 2, Name = "Black" });
+            colors.Add(new Color { Id = 3, Name = "Pink" });
+            colors.Add(new Color { Id = 4, Name = "Green" });
+            colors.Add(new Color { Id = 5, Name = "Gray" });
+            return colors;
+        }
+    }
+}
+```
+
+### 2.4. Teste— ColorControllerTest.
+
+```csharp title="ColorControllerTest.cs"
+using System.Collections.Generic;
+using Colors.WebApi.Controllers;
+using Colors.WebApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Xunit;
+
+namespace Colors.Tests
+{
+    public class ColorControllerTest
+    {
+        private ColorController _controller;
+       public ColorControllerTest()
+        {
+            _controller = new ColorController();
+        }
+        [Fact]
+        public void GetAllColorsTest()
+        {
+            var response = _controller.GetAllColors() 
+                                             as OkObjectResult;
+            var colors = response.Value as List<Color>;
+            Assert.NotNull(colors);
+        }
+        [Theory]
+        [InlineData("red")]
+        [InlineData("black")]
+        public void GetColorTest(string color)
+        {
+           var response = _controller.GetByName(color) 
+                                                 as OkObjectResult;
+           var returnColor = response.Value as Color;
+           Assert.NotNull(returnColor);
+           Assert.Equal(color.ToUpper(),returnColor.Name.ToUpper());
+        }
+    }
+}
+```
+
+## 3. Configuração do Docker
+
+Agora vamos configurar o Docker. Crie um arquivo chamado Dockerfile na raiz 
+do projeto. Utilizaremos o [ASP.NET Core Runtime](https://hub.docker.com/_/microsoft-dotnet-aspnet) 
+e o [.NET SDK](https://hub.docker.com/_/microsoft-dotnet-sdk) do .NET 5, que 
+encontramos no [DockerHub](https://hub.docker.com/). Agora vamos inserir os dois projetos criados Colors.Tests 
+e Colors.WebApi, se você tiver mais projetos além desses, poderá inserir, 
+assim também serão compilados. O arquivo ficará assim:
+
+```bash
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+WORKDIR /app
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+WORKDIR /src
+
+COPY Colors.sln ./
+COPY Colors.WebApi/*.csproj ./Colors.WebApi/
+COPY Colors.Tests/*.csproj ./Colors.Tests/
+
+RUN dotnet restore
+COPY . .
+
+WORKDIR /src/Colors.WebApi
+RUN dotnet build -c Release -o /app
+WORKDIR /src/Colors.Tests
+RUN dotnet build -c Release -o /app
+FROM build AS publish
+RUN dotnet publish -c Release -o /app
+
+FROM base AS final
+WORKDIR /app
+
+COPY --from=publish /app .
+CMD ASPNETCORE_URLS=http://*:$PORT dotnet Colors.WebApi.dll
+```
+
+Basicamente o arquivo Dockerfile, descreve uma rotina de publicação 
+que geralmente realizamos manualmente. Ele copiará todo nosso projeto 
+para dentro da imagem, em seguida, restaurará as dependências. 
+Feito isso, é realizado um build no modo release, para por fim, 
+caso tudo esteja correndo bem, realizar a publicação do projeto, 
+que gera os arquivos corretos de publicação, e então executá-lo.
+
+## 4. Configurando o Github Actions no projeto
+
+*Essa etapa, você também poderia ter feito antes de tudo e clonar 
+o projeto, e começar o desenvolvimento a partir dele.*
+
+Supondo que seguiu o fluxo do artigo, você precisará criar um 
+projeto no Github, feito isso, iremos no nosso repositório em Actions:
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/ci-cd-github-actions-dot-net-5/option-menu-github-actions.jpg`}
+  layout="fill"
+  className="!relative"
+/>
+
+Vamos procurar pelo Workflow do .NET:
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/ci-cd-github-actions-dot-net-5/deploy-option-github-actions.jpg`}
+  layout="fill"
+  className="!relative"
+/>
+
+Ele vai gerar um arquivo com extensão (.yml), é nele que suas 
+configurações deverão ser realizadas, aqui você define quais 
+etapas você deseja que seja executada no processo de integração contínua. 
+Como havia falado antes, configuraremos a parte de teste e build utilizando 
+a imagem do Dockerfile que configuramos anteriormente. 
+Modifique o arquivo ele deve ficar assim:
+
+```yml
+name: .NET 
+on:  
+   push:    
+      branches: [ master ]  
+   pull_request:    
+      branches: [ master ] 
+jobs:  
+   build:     
+      runs-on: ubuntu-latest     
+steps:    
+   - uses: actions/checkout@v2    
+   - name: Setup .NET      
+     uses: actions/setup-dotnet@v1      
+     with:        
+       dotnet-version: 5.0.100    
+   - name: Restore dependencies      
+     run: dotnet restore    
+   - name: Build      
+     run: dotnet build --no-restore    
+   - name: Test      
+     run: dotnet test --no-build --verbosity normal    
+   - name: Docker Build      
+     run: docker build . --file Dockerfile --tag colors-api
+```
+
+Agora que você configurou seu projeto remoto no Github, 
+e não tenha conectado com o projeto local basta fazer o 
+seguinte, na raiz do seu projeto:
+
+```bash
+git init
+git remote add origin {endereço do seu repositório}
+git pull
+```
+
+Pronto, vamos baixar as configurações inseridas e adicionar 
+nossos arquivo e realizar o commit.
+
+```bash
+git add .
+git commit -m “meu primeiro commit”
+git push -u origin master
+```
+
+## 5. Conclusão
+
+Prontinho, após realizar o commit, você poderá ir no seu projeto no Github Actions, 
+e ver todas as etapas rodando. A utilização de integração contínua em nosso projetos, 
+melhora muito a qualidade das nossas entregas, e implementar isso em projetos pessoais 
+é excelente, e serve de prática.
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/ci-cd-github-actions-dot-net-5/deploy-github-actions-result.jpg`}
+  layout="fill"
+  className="!relative"
+/>
+
+Se isso foi útil para vocês, deixe me saber lá no [X/Twitter](https://www.x.com/bylucasqueiroz).

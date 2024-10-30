@@ -1,0 +1,31 @@
+---
+title: 'Kubernetes: Use local Docker images with Minikube'
+description: 'Use local Docker images with Minikube'
+date: '2024-10-29'
+---
+
+In Minikube, you can load local Docker images into the Minikube environment directly.
+
+### Steps:
+
+1. Enable Minikube’s Docker daemon: Run the following command to use Minikube’s Docker daemon, which makes images available directly to Minikube:
+
+```bash
+eval $(minikube docker-env)
+```
+
+2. Build or Tag the Image: Now, you can build or tag your Docker image locally, and it will be available in Minikube.
+
+``` bash
+docker build -t my-local-image:latest .
+```
+
+3. Deploy in Kubernetes: After building or tagging, you can refer to my-local-image:latest in your Kubernetes manifests, and Minikube will use the locally available image.
+
+4. Turn Off Minikube Docker: When done, exit Minikube’s Docker environment:
+
+```bash
+eval $(minikube docker-env -u)
+```
+
+Follow [X/Twitter](https://www.x.com/bylucasqueiroz).

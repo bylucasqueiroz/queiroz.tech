@@ -1,0 +1,60 @@
+---
+title: 'Usefull Docker Commands'
+description: 'Docker commands usually used'
+date: '2024-04-14'
+---
+
+### Start Docker
+
+```bash
+sudo service docker start
+```
+### Stop Docker
+
+```bash
+sudo service docker stop
+```
+### Check container logs
+
+``` bash
+docker logs (container_name)
+```
+### Delete docker container
+
+``` bash
+docker rm -f (container_id_or_name)
+```
+### Stop all containers
+
+```bash
+docker stop $(docker ps -a -q)
+```
+### Remove all containers
+
+```bash
+docker rm $(docker ps -a -q)
+```
+### Bash container access
+
+```bash
+docker exec -it {container} bash
+```
+## Docker Compose
+___
+### Start docker compose without container logs
+
+``` bash
+docker-compose up -d
+```
+### Recreating Containers
+
+``` bash
+docker-compose up --force-recreate -d
+```
+### Clean docker after remove an image
+
+``` bash
+docker-compose up -d --remove-orphans
+```
+
+Se isso foi útil para vocês, deixe me saber lá no [X/Twitter](https://www.x.com/bylucasqueiroz).
