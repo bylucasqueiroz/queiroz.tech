@@ -1,0 +1,299 @@
+---
+title: 'Kubectl command guide'
+description: 'Usefull commands'
+date: '2024-10-31'
+tag: 'kubernetes'
+language: 'en'
+---
+
+## Basic Commands
+
+### Retrieve a list of nodes
+
+A comprehensive guide to essential kubectl commands for effective Kubernetes cluster management.
+
+```bash
+kubectl get no                # Display a basic list of nodes
+kubectl get no -o wide        # List nodes with additional details like IP and role
+kubectl describe no           # Detailed information about each node
+kubectl get no -o yaml        # Output node list in YAML format
+```
+## Retrieve nodes with a specific label
+
+```bash
+kubectl get node --selector=<label_name>   # Filter nodes by a specific label
+kubectl get nodes -o=jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}'  # Display external IPs
+```
+
+## Resource Usage and Monitoring
+
+Monitor the resource usage of nodes and containers.
+
+### Display resource usage statistics
+
+```bash
+kubectl top node <node_name>  # Show resource usage (CPU and memory) for a specific node
+```
+
+## Roles and Namespaces
+
+Commands for managing and listing roles and namespaces.
+
+### Display roles in all namespaces
+
+```bash
+kubectl get roles --all-namespaces       # List roles in all namespaces
+kubectl get roles -o yaml                # List roles in YAML format for more detail
+```
+
+### Display a list of namespaces
+
+```bash
+kubectl get namespaces                   # List available namespaces
+kubectl get ns -o yaml                   # List namespaces in YAML format
+kubectl describe ns <namespace_name>     # Detailed information about a specific namespace
+```
+
+## Pods Management
+
+Essential commands for listing and managing pods.
+
+### Retrieve a list of pods
+
+```bash
+kubectl get po                           # List all pods in the current namespace
+kubectl get po -o wide                   # Display additional pod info like IP and node
+kubectl describe po                      # Show detailed pod information
+kubectl get po --show-labels             # List pods with their associated labels
+kubectl get po -l app=<app_name>         # Filter pods by specific label, like "app"
+kubectl get po -o yaml                   # Output pods in YAML format
+```
+
+### Save the YAML of a specific pod
+
+```bash
+kubectl get po <pod_name> -o yaml --export > <pod_name>.yaml  # Export pod definition to a file
+```
+### Retrieve running pods only
+
+```bash
+kubectl get pods --field-selector=status.phase=Running  # List only running pods
+```
+
+## Deployments Management
+
+Commands to manage deployments within the cluster.
+
+### Retrieve a list of deployments
+
+```bash
+kubectl get deploy                       # List deployments in the current namespace
+kubectl describe deploy <deploy_name>    # Detailed information about a deployment
+kubectl get deploy -o wide               # List deployments with extra details
+kubectl get deploy -o yaml               # Output deployments in YAML format
+```
+
+## Services
+
+Commands to manage and list services, the stable access points to your workloads.
+
+### Retrieve a list of services
+
+```bash
+kubectl get svc                          # List services in the current namespace
+kubectl describe svc <service_name>      # Detailed information about a specific service
+kubectl get svc -o wide                  # List services with additional details
+kubectl get svc -o yaml                  # Output services in YAML format
+kubectl get svc --show-labels            # List services along with their labels
+```
+
+## DaemonSets
+
+Manage DaemonSets, which ensure each node runs a specific copy of a pod.
+
+### Retrieve a list of DaemonSets
+
+```bash
+kubectl get ds                                        # List DaemonSets in the current namespace
+kubectl describe ds <ds_name> -n <namespace_name>     # Detailed information about a specific DaemonSet
+kubectl get ds <ds_name> -n <namespace_name> -o yaml  # Output DaemonSet in YAML format
+
+```
+
+## Events
+
+Display recent events in the cluster, useful for troubleshooting.
+
+### Display events
+
+```bash
+kubectl get events                       # List events in the current namespace
+kubectl get events -n kube-system        # List events specifically in the kube-system namespace
+kubectl get events -w                    # Watch for new events in real-time
+```
+
+## Logs
+
+Retrieve logs from pods, essential for debugging applications.
+
+### Display logs for a pod
+
+```bash
+kubectl logs <pod_name>                  # View logs for a specific pod
+kubectl logs <pod_name> --since=1h       # Logs from the past hour
+kubectl logs --tail=20 <pod_name>        # Last 20 lines of logs
+kubectl logs <pod_name> -c <container_name>  # Logs of a specific container in a pod
+```
+
+### Save logs to a file
+
+```bash
+kubectl logs <pod_name> > pod.log        # Save pod logs to a file for future reference
+```
+
+## Service Accounts
+
+Commands to manage service accounts that provide identities for processes within the cluster.
+
+### Display a list of service accounts
+
+```bash
+kubectl get sa                           # List service accounts in the current namespace
+kubectl get sa -o yaml                   # Service accounts in YAML format
+kubectl get sa default -o yaml > sa.yaml # Save the default service account configuration to a file
+
+```
+
+## ReplicaSets
+
+Manage ReplicaSets, which ensure a specified number of pod replicas are running.
+
+### Retrieve a list of ReplicaSets
+
+```bash
+kubectl get rs                           # List ReplicaSets in the current namespace
+kubectl describe rs <replicaset_name>    # Detailed information about a ReplicaSet
+kubectl get rs -o wide                   # List ReplicaSets with extra details
+kubectl get rs -o yaml                   # Output ReplicaSets in YAML format
+```
+
+## Multiple Resources
+
+Retrieve multiple types of resources at once, useful for broad cluster overview
+
+### Retrieve multiple resources at once
+
+```bash
+kubectl get svc,po                       // List services and pods
+kubectl get deploy,no                    // List deployments and nodes
+kubectl get all                          // List all resources in the current namespace
+kubectl get all --all-namespaces         // List all resources across all namespaces
+```
+
+## Secrets and ConfigMaps
+
+Commands to manage Secrets and ConfigMaps, essential for configuration and sensitive data.
+
+### Retrieve secrets
+
+```bash
+kubectl get secrets                      # List secrets in the current namespace
+kubectl get secrets --all-namespaces     # List secrets in all namespaces
+kubectl get secrets -o yaml              # Output secrets in YAML format
+```
+
+### Retrieve ConfigMaps
+
+```bash
+kubectl get cm                           // List ConfigMaps in the current namespace
+kubectl get cm --all-namespaces          // List ConfigMaps across namespaces
+kubectl get cm --all-namespaces -o yaml  // ConfigMaps in YAML format
+```
+
+## Ingress and Persistent Volume Claims
+
+Manage Ingress resources for HTTP routing and Persistent Volume Claims (PVCs) for storage.
+
+### Retrieve ingresses
+
+```bash
+kubectl get ing                          # List ingresses in the current namespace
+kubectl get ing --all-namespaces         # List ingresses across all namespaces
+```
+
+### Retrieve Persistent Volume Claims
+
+```bash
+kubectl get pvc                                      # List PVCs in the current namespace
+kubectl describe pvc <pvc_name> -n <namespace_name>  # Detailed information about a PVC
+```
+
+## StorageClass
+
+Manage StorageClasses, which define storage provisions within the cluster.
+
+### Retrieve StorageClasses
+
+```bash
+kubectl get sc                           # List all storage classes in the cluster
+kubectl get sc -o yaml                   # Storage classes in YAML format
+```
+
+## Cluster Info
+
+Retrieve configuration details and check the status of cluster components.
+
+### Cluster configuration and status
+
+```bash
+kubectl config view                      # View the current configuration details
+kubectl cluster-info                     # Display information about the cluster
+kubectl get componentstatuses            # Status of Kubernetes components
+```
+
+## Node Operations
+
+Perform node operations such as tainting, labeling, scheduling, and maintenance.
+
+### Label, taint, and schedule nodes
+
+```bash
+kubectl taint node <node_name> <taint_name>  # Apply a taint to a node to restrict scheduling
+kubectl label node <node_name> disktype=ssd  # Add a label to a node
+kubectl cordon <node_name>                   # Mark a node as unschedulable
+kubectl uncordon <node_name>                 # Mark a node as schedulable
+kubectl drain <node_name>                    # Drain a node for maintenance
+kubectl delete node <node_name>              # Remove a node from the cluster
+kubectl edit node <node_name>                # Edit a node's configuration directly
+```
+
+## Namespace and Deployment Operations
+
+Namespace and Deployment operations for management and scaling.
+
+### Namespace operations
+
+```bash
+kubectl delete namespace <namespace_name>    # Delete a specific namespace
+kubectl edit namespace <namespace_name>      # Edit namespace settings
+```
+
+### Deployment operations
+
+```bash
+kubectl delete deploy <deploy_name>          # Remove a deployment
+kubectl edit deploy <deploy_name>            # Modify a deployment's configuration
+kubectl expose deploy <deploy_name> --type=NodePort  # Expose a deployment via NodePort
+kubectl scale deploy
+```
+
+## Create and Apply Resources
+
+### Create and apply resources
+
+```bash
+kubectl create -f <file_name>                // Create resources from a file
+kubectl apply -f <file_name>                 // Apply changes from a file
+kubectl run <pod_name> --image=nginx --restart=Never  // Run a single Nginx pod
+kubectl create svc nodeport <svc_name> --tcp=8080:80  // Create a NodePort service
+```
