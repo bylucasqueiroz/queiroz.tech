@@ -23,15 +23,30 @@ export default function Home() {
             </article>
           ))}
       </div>
+      <div>
+        <h2>Ongoing study projects</h2>
+        <div>
+          <div>
+            <Link href="https://github.com/bylucasqueiroz/queue-server">
+              <h3 className="my-2 hover:text-blue-500">Queue Server</h3>
+            </Link>
+            <p className="m-0 p-0">This project is an in-memory message queue system using gRPC in Go, inspired by AWS SQS.</p>
+          </div>
+          <div>
+            <Link href="https://github.com/bylucasqueiroz/queue-infra"><h3 className="my-2 hover:text-blue-500">Queue Infra</h3></Link>
+            <p className="m-0 p-0">That repository is a part of a project that simulate a SQS Queue using Kubernetes Infrastructure</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
 function Social() {
   const links = [
-    { name: '@lqtalk', url: 'https://x.com/lqtalk' },
-    { name: 'youtube', url: 'https://www.youtube.com/@bylucasqueiroz' },
+    { name: '@bylucasqueiroz', url: 'https://x.com/bylucasqueiroz' },
     { name: 'linkedin', url: 'https://www.linkedin.com/in/bylucasqueiroz' },
+    { name: 'youtube', url: 'https://www.youtube.com/@bylucasqueiroz' },
     { name: 'github', url: 'https://github.com/bylucasqueiroz' },
   ];
 
