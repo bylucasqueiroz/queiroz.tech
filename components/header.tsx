@@ -2,7 +2,7 @@ import Social from "./social";
 
 interface HeaderProps {
     title: string
-    subtitle: string
+    subtitle?: string
     enableSocial?: boolean
   }
 

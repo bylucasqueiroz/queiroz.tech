@@ -29,8 +29,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
                 <ModeToggle />
                 <nav className="ml-auto text-sm font-medium space-x-6">
                   <Link href="/" className="hover:text-blue-500">Home</Link>
-                  <Link href="/blog" className="hover:text-blue-500">Blog</Link>
-                  {/* <Link href="/career" className="hover:text-blue-500">Career</Link> */}
+                  <Link href="/posts" className="hover:text-blue-500">Blog</Link>
+                  <Link href="/career" className="hover:text-blue-500">Career</Link>
                 </nav>
               </div>
             </header>
