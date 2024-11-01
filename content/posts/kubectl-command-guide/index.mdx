@@ -8,6 +8,38 @@ language: 'en'
 
 ## Basic Commands
 
+### Context configuration
+
+
+```bash
+# Set a new context with a specific cluster, namespace, and user
+kubectl config set-context <context> --cluster=my-cluster --namespace=development --user=dev-user
+
+# Switch to a specific context to make it the active context for future commands
+kubectl config use-context <context>
+
+# Display the current active context
+kubectl config current-context
+
+# List all available contexts in the kubeconfig file
+kubectl config get-contexts
+
+# Rename an existing context
+kubectl config rename-context <old_context> <new_context>
+
+# Delete a context from the kubeconfig file
+kubectl config delete-context <old_context>
+
+# Set a default namespace for a specific context
+kubectl config set-context <context> --namespace=default
+```
+
+### Context configuration using EKS
+
+``` bash
+aws eks --region <region> update-kubeconfig --name <cluster_name> --profile <profile>
+```
+
 ### Retrieve a list of nodes
 
 A comprehensive guide to essential kubectl commands for effective Kubernetes cluster management.
@@ -61,18 +93,18 @@ Essential commands for listing and managing pods.
 ### Retrieve a list of pods
 
 ```bash
-kubectl get po                           # List all pods in the current namespace
-kubectl get po -o wide                   # Display additional pod info like IP and node
-kubectl describe po                      # Show detailed pod information
-kubectl get po --show-labels             # List pods with their associated labels
-kubectl get po -l app=<app_name>         # Filter pods by specific label, like "app"
-kubectl get po -o yaml                   # Output pods in YAML format
+kubectl get pod                           # List all pods in the current namespace
+kubectl get pod -o wide                   # Display additional pod info like IP and node
+kubectl describe pod                      # Show detailed pod information
+kubectl get pod --show-labels             # List pods with their associated labels
+kubectl get pod -l app=<app_name>         # Filter pods by specific label, like "app"
+kubectl get pod -o yaml                   # Output pods in YAML format
 ```
 
 ### Save the YAML of a specific pod
 
 ```bash
-kubectl get po <pod_name> -o yaml --export > <pod_name>.yaml  # Export pod definition to a file
+kubectl get pod <pod_name> -o yaml --export > <pod_name>.yaml  # Export pod definition to a file
 ```
 ### Retrieve running pods only
 
@@ -184,10 +216,10 @@ Retrieve multiple types of resources at once, useful for broad cluster overview
 ### Retrieve multiple resources at once
 
 ```bash
-kubectl get svc,po                       // List services and pods
-kubectl get deploy,no                    // List deployments and nodes
-kubectl get all                          // List all resources in the current namespace
-kubectl get all --all-namespaces         // List all resources across all namespaces
+kubectl get svc,pod                       # List services and pods
+kubectl get deploy,node                    # List deployments and nodes
+kubectl get all                          # List all resources in the current namespace
+kubectl get all --all-namespaces         # List all resources across all namespaces
 ```
 
 ## Secrets and ConfigMaps
@@ -205,9 +237,9 @@ kubectl get secrets -o yaml              # Output secrets in YAML format
 ### Retrieve ConfigMaps
 
 ```bash
-kubectl get cm                           // List ConfigMaps in the current namespace
-kubectl get cm --all-namespaces          // List ConfigMaps across namespaces
-kubectl get cm --all-namespaces -o yaml  // ConfigMaps in YAML format
+kubectl get cm                           # List ConfigMaps in the current namespace
+kubectl get cm --all-namespaces          # List ConfigMaps across namespaces
+kubectl get cm --all-namespaces -o yaml  # ConfigMaps in YAML format
 ```
 
 ## Ingress and Persistent Volume Claims
@@ -292,8 +324,8 @@ kubectl scale deploy
 ### Create and apply resources
 
 ```bash
-kubectl create -f <file_name>                // Create resources from a file
-kubectl apply -f <file_name>                 // Apply changes from a file
-kubectl run <pod_name> --image=nginx --restart=Never  // Run a single Nginx pod
-kubectl create svc nodeport <svc_name> --tcp=8080:80  // Create a NodePort service
+kubectl create -f <file_name>                # Create resources from a file
+kubectl apply -f <file_name>                 # Apply changes from a file
+kubectl run <pod_name> --image=nginx --restart=Never  # Run a single Nginx pod
+kubectl create svc nodeport <svc_name> --tcp=8080:80  # Create a NodePort service
 ```
