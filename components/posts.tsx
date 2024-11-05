@@ -6,9 +6,10 @@ import Link from "next/link";
 
 interface PostsProps {
     numberOfPosts?: number;
+    enablePostDetails?: boolean;
 }
 
-export default function Posts({ numberOfPosts }: PostsProps) {
+export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) {
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
     const sortedPosts = allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -27,7 +28,7 @@ export default function Posts({ numberOfPosts }: PostsProps) {
                 )}
             </div>
             {postsToDisplay.map((post) => {
-                const formattedDate = new Date(post.date).toLocaleDateString("en-US", { timeZone: "UTC" });
+                // const formattedDate = new Date(post.date).toLocaleDateString("en-US", { timeZone: "UTC" });
 
                 return (
                     <article key={post._id}>
@@ -37,7 +38,7 @@ export default function Posts({ numberOfPosts }: PostsProps) {
                             </h3>
                         </Link>
                         {post.description && <p className="m-0 p-0">{post.description}</p>}
-                        <div className="flex space-x-2 tracking-tight">
+                        {enablePostDetails && <div className="flex space-x-2 tracking-tight">
                             {post.tag && (
                                 <div className="m-0 p-0 text-sm text-gray-500 flex space-x-1">
                                     <span>tags:</span>
@@ -45,9 +46,8 @@ export default function Posts({ numberOfPosts }: PostsProps) {
                                         <button
                                             key={tag.trim()}
                                             onClick={() => setSelectedTag(tag.trim())}
-                                            className={`text-blue-500 hover:underline no-underline ${
-                                                selectedTag === tag.trim() ? "font-bold" : ""
-                                            }`}
+                                            className={`text-blue-500 hover:underline no-underline ${selectedTag === tag.trim() ? "font-bold" : ""
+                                                }`}
                                         >
                                             {tag.trim()}
                                         </button>
@@ -60,7 +60,7 @@ export default function Posts({ numberOfPosts }: PostsProps) {
                             {post.date && (
                                 <p className="m-0 p-0 text-sm text-gray-500">date: {formattedDate}</p>
                             )} */}
-                        </div>
+                        </div>}
                     </article>
                 );
             })}
