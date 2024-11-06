@@ -1,0 +1,89 @@
+---
+title: 'Unbuffered and Buffered Channels'
+description: 'Whats the difference between Unbuffered and Buffered Channels'
+date: '2024-11-06'
+tag: 'go'
+language: 'en'
+---
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/thread-safe-with-mutex/unbuffered-vs-buffered.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+## Introduction
+
+Working with concurrency in real life, communication between multiple Goroutines is often necessary. For example, in a microservice scenario, you can receive multiple messages, and validate them at a later moment in the current process, if you don’t want to wait for the message validation process to finish before starting a new one. That situation can happen many times, and using channels can ensure communication between multiple Goroutines running concurrently.
+
+Now that you know the purpose of Channels, we can talk about two different kinds: Unbuffered and Buffered Channels.
+
+## Unbuffered Channels
+
+This type of channel has no defined size, the capacity is zero, with a capacity of zero, so it only allows one value to be sent at a time. If no Goroutines are available to read data from the channel, it will be necessary to wait for the Goroutine to finish its current process to access the next value awaiting consumption..
+
+## Buffered Channels
+
+In buffered channels a size is defined upon creation. Buffered channels allow the sender to continue sending values without waiting for each to be consumed, up until the buffer is full.
+
+## Difference and use case
+
+Now, the difference between them is clear: buffered and unbuffered channels are created at initialization, defined by their specified size. If a size is specified, the channel is buffered, if not, it is unbuffered. Buffered channels are typically used when immediate synchronization is not required. Unbuffered channels, by contrast, are used for immediate communication when processing order is crucial.
+
+## Examples
+
+### Buffered
+
+In buffered channels, the first five interactions are produced and stored before the first is consumed. This is because all data is stored in the buffer, which was set to five in this example. This happens because the channel size was defined as five at the beginning of the code. There was no need to wait for the first message to be consumed to store more data. This setup avoids blocking processes on the initial message and waiting for it to be processed.
+
+<GitHubCode language="go" url="https://raw.githubusercontent.com/bylucasqueiroz/goexamples/refs/heads/main/buffered-channel/main.go" />
+
+- Code Output
+
+```bash
+Sending 1
+Sending 2
+Sending 3
+Sending 4
+Sending 5
+All values sent to the buffered channel
+Starting to consume values from the buffered channel
+Received 1
+Received 2
+Received 3
+Received 4
+Received 5
+```
+
+### Unbuffered
+
+In unbuffered channels, everything changes. In this case, each interaction is consumed immediately upon being sent since there is no buffer. Because of that, each interaction is consumed as soon as it’s sent. After one value is processed, the next will follow, and this sequence continues until all interactions are completed.
+
+<GitHubCode language="go" url="https://raw.githubusercontent.com/bylucasqueiroz/goexamples/refs/heads/main/unbuffered-channel/main.go" />
+
+- Code Output
+
+```bash
+Sending 1
+Received 1
+Sent 1
+Sending 2
+Received 2
+Sent 2
+Sending 3
+Received 3
+Sent 3
+Sending 4
+Received 4
+Sent 4
+Sending 5
+Received 5
+Sent 5
+```
+
+## Final Considerations
+
+Considering the above, the difference between them is clear. In conclusion, unbuffered channels are used when immediate synchronization is needed between goroutines, particularly to prevent race conditions that could lead to inconsistencies. Buffered channels are preferable when you want to avoid process blocking, as they can improve efficiency by reducing channel locks. If delayed processing is acceptable, buffered channels work well; otherwise, unbuffered channels are the better choice.
+
+Follow [X/Twitter](https://www.x.com/bylucasqueiroz).

@@ -1,10 +1,12 @@
 import Image from "next/image"
 import Posts from "./posts"
 import { useMDXComponent } from "next-contentlayer/hooks"
+import GitHubCode from "./github-code"
 
 const components = {
   Image,
-  Posts
+  Posts,
+  GitHubCode
 }
 
 interface MdxProps {

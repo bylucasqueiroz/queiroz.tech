@@ -1,5 +1,5 @@
-import Link from "next/link"
 import "./globals.css"
+import Link from "next/link"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Analytics } from "@/components/analytics"
