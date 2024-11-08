@@ -6,9 +6,9 @@ export const runtime = 'edge';
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const postTitle = searchParams.get('title');
-
-  // Fetch font directly from the public folder
-  const font = fetch('/fonts/kaisei-tokumin-bold.ttf').then((res) => res.arrayBuffer());
+  const font = fetch(
+    new URL('../../public/fonts/kaisei-tokumin-bold.ttf', import.meta.url)
+  ).then((res) => res.arrayBuffer());
   const fontData = await font;
 
   return new ImageResponse(
