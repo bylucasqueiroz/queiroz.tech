@@ -31,7 +31,7 @@ export async function generateMetadata({
     return null;
   }
 
-  const { title, description, image, slugAsParams } = post
+  const { title, description, image, slugAsParams, date } = post
 
   const baseUrl = "https://queiroz.tech"
 
@@ -46,7 +46,8 @@ export async function generateMetadata({
       title,
       description,
       type: "article",
-      url: `${baseUrl}/blog/${slugAsParams}`,
+      url: `${baseUrl}/posts/${slugAsParams}`,
+      publishedTime: date,
       images: [
         {
           url: ogImage,
@@ -77,6 +78,28 @@ export default async function PostPage({ params }: PostProps) {
 
   return (
     <article className="prose dark:prose-invert">
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: post.title,
+            datePublished: post.date,
+            dateModified: post.date,
+            description: post.description,
+            image: post.image
+              ? `https://queiroz.tech${post.image}`
+              : `https://queiroz.tech/og?title=${post.title}`,
+            url: `https://queiroz.tech/posts/${post.slug}`,
+            author: {
+              '@type': 'Person',
+              name: 'Lucas Queiroz',
+            },
+          }),
+        }}
+      />
       <Header title={post.title} subtitle={post.description} />
       <Mdx code={post.body.code} />
     </article>
