@@ -27,34 +27,9 @@ export async function generateMetadata({
     return {}
   }
 
-  const { title, description, image, slugAsParams } = page
-
-  const baseUrl = "https://queiroz.tech"
-
-  const ogImage = image
-    ? `${baseUrl}${image}`
-    : `${baseUrl}/og?title=${encodeURIComponent(title)}`
-
   return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      url: `${baseUrl}/blog/${slugAsParams}`,
-      images: [
-        {
-          url: ogImage,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [ogImage],
-    },
+    title: page.title,
+    description: page.description,
   }
 }
 

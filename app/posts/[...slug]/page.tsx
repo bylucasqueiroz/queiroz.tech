@@ -31,10 +31,35 @@ export async function generateMetadata({
     return null;
   }
 
+  const { title, description, image, slugAsParams } = post
+
+  const baseUrl = "https://queiroz.tech"
+
+  const ogImage = image
+    ? `${baseUrl}${image}`
+    : `${baseUrl}/og?title=${encodeURIComponent(title)}`
+
   return {
-    title: post.title,
-    description: post.description,
-  };
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: `${baseUrl}/blog/${slugAsParams}`,
+      images: [
+        {
+          url: ogImage,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+  }
 }
 
 export async function generateStaticParams(): Promise<PostProps["params"][]> {
