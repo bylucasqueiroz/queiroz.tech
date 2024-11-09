@@ -29,7 +29,10 @@ export const Page = defineDocumentType(() => ({
     },
     language: {
       type: "string",
-    }
+    },
+    image: {
+      type: "string",
+    },
   },
   computedFields,
 }))
