@@ -9,12 +9,18 @@ export default function OngoingProjects() {
     return (
         <div>
             {repos.map((repo) => (
-                <div key={repo.project}>
-                    <Link href={repo.url} className="no-underline" target="_blank">
-                        <h3 className="my-2 before:content-['•'] before:mr-2 hover:text-blue-500">{repo.project}</h3>
-                    </Link>
-                    <p className="m-0 p-0">{repo.description}</p>
-                </div>
+                <article key={repo.project} className="mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <Link href={repo.url} className="no-underline">
+                    <h4 className="text-xl font-semibold mb-1 hover:text-indigo-500 transition-colors">
+                        {repo.project}
+                    </h4>
+                </Link>
+                {repo.description && (
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                        {repo.description}
+                    </p>
+                )}
+                </article>
             ))}
         </div>
     );

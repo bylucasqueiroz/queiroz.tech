@@ -11,11 +11,11 @@ export default function Home() {
         enableSocial
       />
       <div>
-        <h2>Last posts</h2>
+        <h3 className="text-2xl">Last posts</h3>
         <Posts numberOfPosts={3} />
       </div>
       <div>
-        <h2>Ongoing study projects</h2>
+        <h3 className="text-2xl">Ongoing study projects</h3>
         <OngoingProjects />
       </div>
     </div>

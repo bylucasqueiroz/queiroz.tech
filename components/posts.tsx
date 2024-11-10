@@ -19,48 +19,68 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
     const postsToDisplay = numberOfPosts ? filteredPosts.slice(0, numberOfPosts) : filteredPosts;
 
     return (
-        <div>
-            <div className="mb-4">
+        <div className="max-w-2xl mx-auto">
+            <div className="mb-6">
                 {selectedTag && (
-                    <button onClick={() => setSelectedTag(null)} className="text-blue-500 hover:underline">
+                    <button
+                        onClick={() => setSelectedTag(null)}
+                        className="text-sm text-indigo-500 hover:underline"
+                    >
                         Clear filter: {selectedTag}
                     </button>
                 )}
             </div>
             {postsToDisplay.map((post) => {
-                // const formattedDate = new Date(post.date).toLocaleDateString("en-US", { timeZone: "UTC" });
+                const formattedDate = new Date(post.date).toLocaleDateString("en-US", { timeZone: "UTC" });
 
                 return (
-                    <article key={post._id}>
+                    <article key={post._id} className="mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
                         <Link href={post.slug} className="no-underline">
-                            <h3 className="mt-2 m-0 p-0 before:content-['•'] before:mr-2 hover:text-blue-500">
+                            <h4 className="text-xl font-semibold mb-1 hover:text-indigo-500 transition-colors">
                                 {post.title}
-                            </h3>
+                            </h4>
                         </Link>
-                        {post.description && <p className="m-0 p-0">{post.description}</p>}
-                        {enablePostDetails && <div className="flex space-x-2 tracking-tight">
-                            {post.tag && (
-                                <div className="m-0 p-0 text-sm text-gray-500 flex space-x-1">
-                                    <span>tags:</span>
-                                    {post.tag.split(",").map((tag) => (
-                                        <button
-                                            key={tag.trim()}
-                                            onClick={() => setSelectedTag(tag.trim())}
-                                            className={`text-blue-500 hover:underline no-underline ${selectedTag === tag.trim() ? "font-bold" : ""
-                                                }`}
-                                        >
-                                            {tag.trim()}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                            {/* {post.language && (
-                                <p className="m-0 p-0 text-sm text-gray-500">language: {post.language}</p>
-                            )}
-                            {post.date && (
-                                <p className="m-0 p-0 text-sm text-gray-500">date: {formattedDate}</p>
-                            )} */}
-                        </div>}
+                        {post.description && (
+                            <p className="text-gray-600 dark:text-gray-400 mb-2">
+                                {post.description}
+                            </p>
+                        )}
+                        {enablePostDetails && (
+                            <div className="flex flex-wrap items-center space-y-1 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                {/* Tags */}
+                                {post.tag && (
+                                    <div className="flex items-center space-x-1 mr-4">
+                                        <span>Tags:</span>
+                                        <div className="flex flex-wrap space-x-2">
+                                            {post.tag.split(",").map((tag) => (
+                                                <button
+                                                    key={tag.trim()}
+                                                    onClick={() => setSelectedTag(tag.trim())}
+                                                    className={`px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white transition-colors ${selectedTag === tag.trim() ? "font-semibold" : ""
+                                                        }`}
+                                                >
+                                                    {tag.trim()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {/* Language */}
+                                {post.language && (
+                                    <div className="flex items-center space-x-1 mr-4">
+                                        <span>Language:</span>
+                                        <p className="text-gray-600 dark:text-gray-400">{post.language}</p>
+                                    </div>
+                                )}
+                                {/* Date */}
+                                {post.date && (
+                                    <div className="flex items-center space-x-1">
+                                        <span>Date:</span>
+                                        <p className="text-gray-600 dark:text-gray-400">{formattedDate}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </article>
                 );
             })}
