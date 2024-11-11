@@ -67,7 +67,7 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                                                 <button
                                                     key={tag.trim()}
                                                     onClick={() => setSelectedTag(tag.trim())}
-                                                    className={`px-2 py-1 rounded-full bg-gray-200 dark:bg-[#121D2F] dark:text-[#4493F8] dark:hover:text-white dark:hover:bg-[#4493F8] text-[#4493F8] hover:bg-[#4493F8] hover:text-white ${selectedTag === tag.trim() ? "font-semibold" : ""
+                                                    className={`px-2 py-1 font-semibold rounded-full bg-gray-200 dark:bg-[#121D2F] dark:text-[#4493F8] dark:hover:text-white dark:hover:bg-[#4493F8] text-[#4493F8] hover:bg-[#4493F8] hover:text-white ${selectedTag === tag.trim() ? "font-semibold" : ""
                                                         }`}
                                                 >
                                                     {tag.trim()}
