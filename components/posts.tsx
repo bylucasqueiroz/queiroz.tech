@@ -31,32 +31,43 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                 )}
             </div>
             {postsToDisplay.map((post) => {
-                const formattedDate = new Date(post.date).toLocaleDateString("en-US", { timeZone: "UTC" });
+                const formattedDate = new Date(post.date).toLocaleDateString("en-US", {
+                    timeZone: "UTC",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                });
 
                 return (
                     <article key={post._id} className="mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
-                        <Link href={post.slug} className="no-underline">
-                            <h4 className="text-xl font-semibold mb-1 hover:text-indigo-500 transition-colors">
+                        <div className="flex items-center space-x-2">
+                            <Link href={post.slug} className="text-lg font-semibold mb-0 text-[#4493F8] transition-colors no-underline hover:underline hover:decoration-[#4493F8]">
                                 {post.title}
-                            </h4>
-                        </Link>
+                            </Link>
+                            {/* Language Badge */}
+                            {post.language && (
+                                <span className="border border-gray-500 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-200 rounded-md">
+                                {post.language}
+                            </span>
+                            )}
+                        </div>
                         {post.description && (
-                            <p className="text-gray-600 dark:text-gray-400 mb-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-1">
                                 {post.description}
                             </p>
                         )}
                         {enablePostDetails && (
-                            <div className="flex flex-wrap items-center space-y-1 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-xs flex flex-wrap items-center space-y-1 mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 {/* Tags */}
                                 {post.tag && (
-                                    <div className="flex items-center space-x-1 mr-4">
+                                    <div className="flex items-center space-x-1 mr-4 mt-1">
                                         <span>Tags:</span>
                                         <div className="flex flex-wrap space-x-2">
                                             {post.tag.split(",").map((tag) => (
                                                 <button
                                                     key={tag.trim()}
                                                     onClick={() => setSelectedTag(tag.trim())}
-                                                    className={`px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white transition-colors ${selectedTag === tag.trim() ? "font-semibold" : ""
+                                                    className={`px-2 py-1 rounded-full bg-gray-200 dark:bg-[#121D2F] dark:text-[#4493F8] dark:hover:text-white dark:hover:bg-[#4493F8] text-[#4493F8] hover:bg-[#4493F8] hover:text-white ${selectedTag === tag.trim() ? "font-semibold" : ""
                                                         }`}
                                                 >
                                                     {tag.trim()}
@@ -65,17 +76,10 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                                         </div>
                                     </div>
                                 )}
-                                {/* Language */}
-                                {post.language && (
-                                    <div className="flex items-center space-x-1 mr-4">
-                                        <span>Language:</span>
-                                        <p className="text-gray-600 dark:text-gray-400">{post.language}</p>
-                                    </div>
-                                )}
                                 {/* Date */}
                                 {post.date && (
                                     <div className="flex items-center space-x-1">
-                                        <span>Date:</span>
+                                        <span>Created on</span>
                                         <p className="text-gray-600 dark:text-gray-400">{formattedDate}</p>
                                     </div>
                                 )}

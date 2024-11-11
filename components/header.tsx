@@ -14,7 +14,7 @@ export default function Header({title, subtitle, enableSocial = false}: HeaderPr
         <p className="text-xl my-2">{subtitle}</p>
       </div>
       {enableSocial && <Social />}
-      <hr className="mt-4" />
+      <hr className="mt-4 m-0" />
     </div>
   )
 }

@@ -20,7 +20,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body
-        className={`antialiased min-h-screen bg-white dark:bg-[#111010] text-slate-900 dark:text-slate-50 ${inter.className}`}
+        className={`antialiased min-h-screen bg-white dark:bg-[#0D1117] text-slate-900 dark:text-slate-50 ${inter.className}`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="max-w-2xl mx-auto py-10 px-4">
@@ -28,9 +28,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
               <div className="flex items-center justify-between">
                 <ModeToggle />
                 <nav className="ml-auto text-sm font-medium space-x-6">
-                  <Link href="/" className="hover:text-indigo-500">Home</Link>
-                  <Link href="/posts" className="hover:text-indigo-500">Blog</Link>
-                  <Link href="/career" className="hover:text-indigo-500">Career</Link>
+                  <Link href="/" className="hover:text-[#4493F8]">Home</Link>
+                  <Link href="/posts" className="hover:text-[#4493F8]">Blog</Link>
+                  <Link href="/career" className="hover:text-[#4493F8]">Career</Link>
                 </nav>
               </div>
             </header>

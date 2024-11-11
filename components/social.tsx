@@ -14,7 +14,7 @@ export default function Social() {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 hover:text-indigo-500 transition-colors duration-200 no-underline"
+            className="text-gray-400 hover:text-[#4493F8] transition-colors duration-200 no-underline hover:underline"
           >
             {link.name}
           </a>
