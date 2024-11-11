@@ -24,7 +24,7 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                 {selectedTag && (
                     <button
                         onClick={() => setSelectedTag(null)}
-                        className="text-sm text-indigo-500 hover:underline"
+                        className="text-sm text-[#4493F8] hover:underline"
                     >
                         Clear filter: {selectedTag}
                     </button>
@@ -46,7 +46,7 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                             </Link>
                             {/* Language Badge */}
                             {post.language && (
-                                <span className="border border-gray-500 px-2 py-0.5 text-xs text-gray-500 dark:text-gray-200 rounded-md">
+                                <span className="border border-gray-600 px-2 py-0.5 text-xs text-gray-600 dark:text-gray-400 rounded-md">
                                 {post.language}
                             </span>
                             )}
