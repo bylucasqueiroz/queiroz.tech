@@ -1,0 +1,63 @@
+---
+title: 'How to ensure thread-safeness in Go'
+description: 'Working with Mutex to ensure thread-safeness in Go'
+date: '2024-11-13'
+tag: 'go'
+language: 'en'
+---
+
+Working with multithreading we can encounter some challenges, one of them being data integrity when a value is accessed by services running in parallel. In Go, we have Mutex to help us synchronize the data between goroutines running in multiple threads.
+
+Mutex is known as Mutual Exclusion, allows us to lock and unlock a value while we are modifying it. This means the resource is locked during the update, and other processes must wait until the process is completed.
+
+Let's check the example
+
+## The scenario - Without Mutex
+
+Here’s a code example without mutex. It’s a simple program that opens 10 goroutines, each incrementing a variable a thousand times. In this situation, we can encounter a race condition: multiple goroutines trying to update the same value simultaneously, which can lead to unpredictable results. Ideally, after the code runs, we should get 10.000 as the result (because 10 x 1000 = 10.000). But what actually happens? Look at the code.
+
+<GitHubCode language="go" url="https://raw.githubusercontent.com/bylucasqueiroz/goexamples/refs/heads/main/without-mutex/main.go" />
+
+As you can see, sometimes the result is correct. However, when I ran it multiple times, the issue appeared. This is the main problem, without synchronization or Mutex, there are race conditions, and during that time, you might see different results, like 7109. In production environments, we need to ensure consistent values for all processes.
+
+```bash
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (without mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (without mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (without mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (without mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (without mutex): 7109
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (without mutex): 10000
+```
+
+## The solution - Using Mutex
+
+Now that you understand the problem, let’s see how to fix it. With Mutex we can lock a value before changing it, if another process tries to access the value, it will wait until the first interaction changing the value finishes. Here’s the code with Mutex applied:
+
+<GitHubCode language="go" url="https://raw.githubusercontent.com/bylucasqueiroz/goexamples/refs/heads/main/with-mutex/main.go" />
+
+As you can see, running multiple times, the result is the expected. This way, we can prevent race conditions and invalid results.
+
+```bash
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (with mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (with mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (with mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (with mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (with mutex): 10000
+lucas@queiroz:~/git/goexamples/mutex$ go run main.go 
+Final Counter (with mutex): 10000
+```
+
+## The result
+
+In scenarios where values are shared between multiple goroutines and should be consistent across all of them, Mutex helps maintain data integrity by preventing race conditions and inconsistency results.
