@@ -1,0 +1,81 @@
+---
+title: 'Checking the Available Package Manager on Linux'
+description: 'A quick guide to identifying which package manager is available on a Linux machine, such as an EC2 instance.'
+date: '2025-04-29'
+tag: ['linux', 'ec2', 'packages', 'ia']
+language: 'en'
+---
+
+# ✅ Checking the Available Package Manager
+
+**Context:**  
+I needed to identify which package manager was available on an EC2 instance before installing tools like `netcat`, `telnet`, and `dig`.
+
+---
+
+## 🔍 Steps Used
+
+### 1. Identify the Linux distribution
+
+```bash
+cat /etc/os-release
+```
+
+Example output:
+
+```
+ID=amzn
+NAME="Amazon Linux"
+```
+
+### 2. Check which package manager is available
+
+```bash
+which apt
+which yum
+which dnf
+which apk
+```
+
+If one of these returns a valid path (e.g. `/usr/bin/yum`), that package manager is installed on the system.
+
+---
+
+## 📋 Quick Reference
+
+| Distribution    | Package Manager  |
+|------------------|------------------|
+| Ubuntu/Debian    | `apt`            |
+| Amazon Linux     | `yum` / `dnf`    |
+| Alpine Linux     | `apk`            |
+| CentOS           | `yum`            |
+| Fedora           | `dnf`            |
+
+---
+
+## 🛠️ Usage Examples by Package Manager
+
+### Debian/Ubuntu
+
+```bash
+sudo apt update
+sudo apt install netcat
+```
+
+### Amazon Linux / CentOS
+
+```bash
+sudo yum update
+sudo yum install nc
+```
+
+### Alpine
+
+```bash
+sudo apk update
+sudo apk add netcat-openbsd
+```
+
+---
+
+> 📌 This documentation was generated with help from AI (ChatGPT) and validated manually after testing on a real EC2 instance.
