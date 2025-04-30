@@ -6,14 +6,12 @@ tag: 'linux,ec2,packages,ia'
 language: 'en'
 ---
 
-# ✅ Checking the Available Package Manager
-
 **Context:**  
 I needed to identify which package manager was available on an EC2 instance before installing tools like `netcat`, `telnet`, and `dig`.
 
 ---
 
-## 🔍 Steps Used
+## Steps Used
 
 ### 1. Identify the Linux distribution
 
@@ -41,8 +39,10 @@ If one of these returns a valid path (e.g. `/usr/bin/yum`), that package manager
 
 ---
 
-## 📋 Quick Reference
+## Quick Reference
 
+<div style={{ overflowX: 'auto' }}>
+  
 | Distribution    | Package Manager  |
 |------------------|------------------|
 | Ubuntu/Debian    | `apt`            |
@@ -51,9 +51,11 @@ If one of these returns a valid path (e.g. `/usr/bin/yum`), that package manager
 | CentOS           | `yum`            |
 | Fedora           | `dnf`            |
 
+</div>
+
 ---
 
-## 🛠️ Usage Examples by Package Manager
+## Usage Examples by Package Manager
 
 ### Debian/Ubuntu
 
