@@ -14,7 +14,7 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
 
     const sortedPosts = allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const filteredPosts = selectedTag
-        ? sortedPosts.filter(post => post.tag?.map(tag => tag.trim()).includes(selectedTag))
+        ? sortedPosts.filter(post => post.tag?.split(",").map(tag => tag.trim()).includes(selectedTag))
         : sortedPosts;
     const postsToDisplay = numberOfPosts ? filteredPosts.slice(0, numberOfPosts) : filteredPosts;
 
@@ -63,7 +63,7 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                                     <div className="flex items-center space-x-1 mr-4 mt-1">
                                         <span>Tags:</span>
                                         <div className="flex flex-wrap space-x-2">
-                                            {post.tag.map((tag) => (
+                                            {post.tag.split(",").map((tag) => (
                                                 <button
                                                     key={tag.trim()}
                                                     onClick={() => setSelectedTag(tag.trim())}
