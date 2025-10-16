@@ -2,7 +2,6 @@ export default function Social() {
     const links = [
       { name: '@bylucasqueiroz', url: 'https://x.com/bylucasqueiroz' },
       { name: 'linkedin', url: 'https://www.linkedin.com/in/bylucasqueiroz' },
-      { name: 'youtube', url: 'https://www.youtube.com/@bylucasqueiroz' },
       { name: 'github', url: 'https://github.com/bylucasqueiroz' },
     ];
   
