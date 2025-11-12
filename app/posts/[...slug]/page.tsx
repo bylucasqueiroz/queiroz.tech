@@ -1,3 +1,4 @@
+import "@/lib/react-internals-polyfill"
 import { notFound } from "next/navigation"
 import { allPosts } from "contentlayer/generated"
 
@@ -5,30 +6,32 @@ import { Metadata } from "next"
 import { Mdx } from "@/components/mdx-components"
 import Header from "@/components/header"
 
+type StaticParams = { slug: string[] }
+type PageParams = Promise<StaticParams | undefined>
+
 interface PostProps {
-  params: {
-    slug: string[]
-  }
+  params: PageParams
 }
 
-async function getPostFromParams(params: PostProps["params"]) {
-  const slug = params?.slug?.join("/");
-  const post = allPosts.find((post) => post.slugAsParams === slug);
+async function getPostFromParams(params: PageParams) {
+  const resolvedParams = await params
+  const slug = resolvedParams?.slug?.join("/")
+  const post = allPosts.find((entry) => entry.slugAsParams === slug)
 
   if (!post) {
-    notFound();
+    notFound()
   }
 
-  return post;
+  return post
 }
 
 export async function generateMetadata({
   params,
 }: PostProps): Promise<Metadata | null> {
-  const post = await getPostFromParams(params);
+  const post = await getPostFromParams(params)
 
   if (!post) {
-    return null;
+    return null
   }
 
   const { title, description, image, slugAsParams, date } = post
@@ -63,7 +66,7 @@ export async function generateMetadata({
   }
 }
 
-export async function generateStaticParams(): Promise<PostProps["params"][]> {
+export async function generateStaticParams(): Promise<StaticParams[]> {
   return allPosts.map((post) => ({
     slug: post.slugAsParams.split("/"),
   }))

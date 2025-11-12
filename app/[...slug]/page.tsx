@@ -1,3 +1,4 @@
+import "@/lib/react-internals-polyfill"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import { allPages } from "contentlayer/generated"
@@ -5,15 +6,17 @@ import { allPages } from "contentlayer/generated"
 import { Mdx } from "@/components/mdx-components"
 import Header from "@/components/header"
 
+type StaticParams = { slug: string[] }
+type PageParams = Promise<StaticParams | undefined>
+
 interface PageProps {
-  params: {
-    slug: string[]
-  }
+  params: PageParams
 }
 
-async function getPageFromParams(params: PageProps["params"]) {
-  const slug = params?.slug?.join("/")
-  const page = allPages.find((page) => page.slugAsParams === slug)
+async function getPageFromParams(params: PageParams) {
+  const resolvedParams = await params
+  const slug = resolvedParams?.slug?.join("/")
+  const page = allPages.find((entry) => entry.slugAsParams === slug)
 
   return page || null
 }
@@ -33,7 +36,7 @@ export async function generateMetadata({
   }
 }
 
-export async function generateStaticParams(): Promise<PageProps["params"][]> {
+export async function generateStaticParams(): Promise<StaticParams[]> {
   return allPages.map((page) => ({
     slug: page.slugAsParams.split("/"),
   }))
