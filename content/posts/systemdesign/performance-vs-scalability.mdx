@@ -1,0 +1,59 @@
+---
+title: "Scalability and Performance"
+description: "Understanding the difference between scalability and performance."
+date: "2025-11-26"
+tag: "system_design"
+language: "en"
+---
+
+I have started reviewing some concepts about system design, and there are a few words that are especially common when we talk about systems that need to process hundreds of transactions per day. These words are performance and scalability.
+
+In my mind, the concepts of these words were clear, but I started to realize that although these terms usually go hand in hand, it doesn’t mean they have the same meaning.
+
+Let’s break it down.
+
+## Performance
+
+When we talk about performance, we are talking about how fast a system works with a fixed amount of resources. Using a car as an example: how much time does a single car need to bring a group of people from one point to another? That’s the question. And when we talk about systems, it becomes: how long does a single instance of our service take to handle a certain workload?
+
+Looking at performance, there are some important points we can analyze to measure how the system is behaving under load, like latency per request, throughput per instance, response time, and even resource utilization.
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/performance-vs-scalability/performance.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+As you can see in the image, we have a queue of transactions with only one service instance processing it. Each transaction takes 1 second to be processed, so we have 1 TPS. But you can also see that the queue has 10 messages waiting to be processed sequentially. So this instance is capable of processing 10 transactions every 10 seconds which gives us a clear idea of its maximum throughput.
+
+This example is specifically about the throughput of one single instance. It's not about the whole system just that one instance and how it performs when processing messages one by one.
+
+With that in mind, we can evaluate our scenario and decide if we need to optimize the service, remove bottlenecks, or even rethink part of the architecture if the performance isn’t good enough for the project.
+
+Basically, we can understand how many transactions one instance can process in one day and use that to make better decisions.
+
+## Scalability
+
+Talking about scalability, we are talking about the system’s ability to handle an increasing amount of workload by adding more resources. In other words, the system adapts to the workload not the opposite. Using the same car example: if you add more cars to transport the same amount of people, the total time decreases. That’s horizontal scaling.
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/performance-vs-scalability/scalability.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Now the scenario changes. If our service instance is capable of handling 1 message per second, and we have 5 instances working to process those 10 transactions, the total time drops to 2 seconds because each instance processes one message independently.
+
+This is a simplified linear-scaling example. In real systems, scaling isn’t always perfectly linear because of overhead, coordination, network, etc. But the idea still works to explain the concept.
+
+It's also important to say that each instance still takes 1 second to process a message the latency per transaction doesn’t magically decrease. What improves is the total time to process the whole workload because we distributed the work.
+
+## Conclusion
+
+In summary, talking about performance is talking about how fast a single transaction can be processed, and talking about scalability is talking about the system’s ability to handle a huge amount of transactions by distributing the workload across multiple instances.
+
+I’m not getting into scaling strategies here (like autoscaling, horizontal scaling, vertical scaling, and so on). My goal is just to make the difference between performance and scalability clear.
+
+Thanks for reading it :)
