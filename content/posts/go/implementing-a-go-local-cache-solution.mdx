@@ -1,10 +1,17 @@
 ---
 title: 'Implementing a Go local cache solution'
-description: 'How to implement a cache solution that scales in Go that you can reuse between multiple applications.'
+description: 'How to implement a cache solution that scales in Go that you can reuse across multiple applications.'
 date: '2026-02-17'
 tag: 'go'
 language: 'en'
 ---
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/implementing-a-go-local-cache-solution/implementing-a-go-local-cache-solution.png`}
+  layout="fill"
+  className="!relative"
+/>
 
 Cache can be used in multiple scenarios, especially when you want to have a layer between your service and a database or a second service that always returns the same information for a period of time, like an API or something like that. In some cases, it can be necessary to use a distributed cache like Redis, where you will have a cluster to store your data. This happens especially when you are working with multiple services running at the same time, with many replicas like pods or tasks.
 
@@ -23,7 +30,7 @@ type localCacheItem struct {
 }
 ```
 
-The second important part is that our cache needs to be safe when we have multiple concurrent executions consuming it. Here, we will use an RWMutex to ensure mutual exclusion. The lock can be held by multiple readers or a single writer. It ensures that all goroutines access the data safely. You can read more about Mutex here.
+The second important part is that our cache needs to be safe when we have multiple concurrent executions consuming it. Here, we will use an RWMutex to ensure mutual exclusion. [The lock can be held by multiple readers or a single writer](https://go.dev/src/sync/rwmutex.go). It ensures that all goroutines access the data safely. You can read more about Mutex [here](https://queiroz.tech/posts/go/how-to-ensure-thread-safeness-in-go).
 
 ``` go
 type LocalCache struct {
