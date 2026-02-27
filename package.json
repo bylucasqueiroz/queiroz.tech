@@ -21,6 +21,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/og": "^0.8.5",
     "autoprefixer": "10.4.22",
+    "baseline-browser-mapping": "^2.10.0",
     "contentlayer": "^0.3.4",
     "eslint": "9.39.1",
     "eslint-config-next": "16.0.1",
