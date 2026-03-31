@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { allPosts } from "@/.contentlayer/generated";
+import { posts } from "@/.velite";
 import Link from "next/link";
 
 interface PostsProps {
@@ -12,7 +12,7 @@ interface PostsProps {
 export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) {
     const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-    const sortedPosts = allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const sortedPosts = [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const filteredPosts = selectedTag
         ? sortedPosts.filter(post => post.tag?.split(",").map(tag => tag.trim()).includes(selectedTag))
         : sortedPosts;
@@ -39,12 +39,11 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                 });
 
                 return (
-                    <article key={post._id} className="mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <article key={post.slugAsParams} className="mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center space-x-2">
                             <Link href={post.slug} className="text-lg font-semibold mb-0 text-[#4493F8] transition-colors no-underline hover:underline hover:decoration-[#4493F8]">
                                 {post.title}
                             </Link>
-                            {/* Language Badge */}
                             {post.language && (
                                 <span className="border border-gray-600 px-2 py-0.5 text-xs text-gray-600 dark:text-gray-400 rounded-md">
                                 {post.language}
@@ -58,7 +57,6 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                         )}
                         {enablePostDetails && (
                             <div className="text-xs flex flex-wrap items-center space-y-1 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                {/* Tags */}
                                 {post.tag && (
                                     <div className="flex items-center space-x-1 mr-4 mt-1">
                                         <span>Tags:</span>
@@ -76,7 +74,6 @@ export default function Posts({ numberOfPosts, enablePostDetails }: PostsProps) 
                                         </div>
                                     </div>
                                 )}
-                                {/* Date */}
                                 {post.date && (
                                     <div className="flex items-center space-x-1">
                                         <span>Created on</span>

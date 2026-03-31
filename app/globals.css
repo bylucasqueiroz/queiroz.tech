@@ -1,13 +1,38 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-html {
-    color-scheme: dark;
-  }
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* ─── Color tokens ─────────────────────────────────────────────── */
+@theme inline {
+  --color-accent:        var(--accent);
+  --color-accent-hover:  var(--accent-hover);
+  --color-subtle:        var(--subtle);
+  --color-subtle-border: var(--subtle-border);
+}
+
+/* Light mode */
+:root {
+  color-scheme: light dark;
+
+  --accent:        #1a65cc;   /* darker blue — passes WCAG AA on white */
+  --accent-hover:  #1553aa;
+  --subtle:        #eff6ff;   /* blue-50 tint for tag chips */
+  --subtle-border: #bfdbfe;   /* blue-200 */
+}
+
+/* Dark mode */
+.dark {
+  --accent:        #4493F8;
+  --accent-hover:  #6aabff;
+  --subtle:        #121D2F;
+  --subtle-border: #1e3a5f;
+}
+
+/* ─── Base ─────────────────────────────────────────────────────── */
 .prose h2,
 h3,
 h4 {
-  @apply font-medium tracking-tighter !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.025em !important;
 }

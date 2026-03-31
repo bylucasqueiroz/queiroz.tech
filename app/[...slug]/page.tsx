@@ -1,7 +1,6 @@
-import "@/lib/react-internals-polyfill"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
-import { allPages } from "contentlayer/generated"
+import { pages } from "@/.velite"
 
 import { Mdx } from "@/components/mdx-components"
 import Header from "@/components/header"
@@ -16,7 +15,7 @@ interface PageProps {
 async function getPageFromParams(params: PageParams) {
   const resolvedParams = await params
   const slug = resolvedParams?.slug?.join("/")
-  const page = allPages.find((entry) => entry.slugAsParams === slug)
+  const page = pages.find((entry) => entry.slugAsParams === slug)
 
   return page || null
 }
@@ -37,7 +36,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams(): Promise<StaticParams[]> {
-  return allPages.map((page) => ({
+  return pages.map((page) => ({
     slug: page.slugAsParams.split("/"),
   }))
 }
@@ -52,7 +51,7 @@ export default async function PagePage({ params }: PageProps) {
   return (
     <article className="prose dark:prose-invert">
       <Header title={page.title} subtitle={page.description} />
-      <Mdx code={page.body.code} />
+      <Mdx content={page.content as unknown as string} />
     </article>
   )
 }
