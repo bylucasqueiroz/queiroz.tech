@@ -1,11 +1,12 @@
 import { ImageResponse } from "next/og"
 import { NextRequest } from "next/server"
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const postTitle = searchParams.get('title');
+  const raw = searchParams.get('title') ?? ''
+  const postTitle = raw.slice(0, 120);
   const fontData = await fetch(
     'https://queiroz.tech/fonts/kaisei-tokumin-bold.ttf'
   ).then((res) => res.arrayBuffer());

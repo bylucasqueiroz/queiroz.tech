@@ -19,8 +19,9 @@ export default async function PostsPage({ searchParams }: { searchParams: Search
     new Set(posts.flatMap((p) => p.tag?.split(",").map((t) => t.trim()).filter(Boolean) ?? []))
   ).sort()
 
-  const filtered = tag
-    ? sorted.filter((p) => p.tag?.split(",").map((t) => t.trim()).includes(tag))
+  const validTag = tag && allTags.includes(tag) ? tag : null
+  const filtered = validTag
+    ? sorted.filter((p) => p.tag?.split(",").map((t) => t.trim()).includes(validTag))
     : sorted
 
   const byYear = filtered.reduce<Record<number, typeof filtered>>((acc, post) => {
@@ -49,7 +50,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Search
         <Link
           href="/posts"
           className={`px-3 py-1 text-xs rounded-full font-medium transition-colors border ${
-            !tag
+            !validTag
               ? "bg-accent text-white border-accent"
               : "bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-accent hover:text-accent"
           }`}
@@ -61,7 +62,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Search
             key={t}
             href={`/posts?tag=${encodeURIComponent(t)}`}
             className={`px-3 py-1 text-xs rounded-full font-medium transition-colors border ${
-              tag === t
+              validTag === t
                 ? "bg-accent text-white border-accent"
                 : "bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-accent hover:text-accent"
             }`}
