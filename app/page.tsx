@@ -84,7 +84,7 @@ export default function Home() {
       <section>
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-sm font-semibold tracking-widest uppercase text-gray-500 dark:text-gray-400">
-            Projects
+            Recent Activity
           </h2>
           <a
             href="https://github.com/bylucasqueiroz"

@@ -1,4 +1,45 @@
 import { defineConfig, defineCollection, s } from "velite"
+import rehypePrettyCode from "rehype-pretty-code"
+import type { Root, Element } from "hast"
+
+// Runs BEFORE rehype-pretty-code: converts <pre><code class="language-mermaid">
+// into <div data-mermaid="..."> so rehype-pretty-code never touches it.
+function rehypeProtectMermaid() {
+  return (tree: Root) => {
+    function walk(node: Root | Element) {
+      if (!("children" in node)) return
+      node.children = node.children.map((child) => {
+        if (
+          child.type === "element" &&
+          child.tagName === "pre"
+        ) {
+          const code = child.children[0]
+          if (
+            code?.type === "element" &&
+            code.tagName === "code" &&
+            (code.properties?.className as string[] | undefined)?.includes(
+              "language-mermaid"
+            )
+          ) {
+            const raw =
+              code.children[0]?.type === "text"
+                ? code.children[0].value
+                : ""
+            return {
+              type: "element",
+              tagName: "div",
+              properties: { "data-mermaid": raw },
+              children: [],
+            } as Element
+          }
+        }
+        walk(child as Element)
+        return child
+      })
+    }
+    walk(tree)
+  }
+}
 
 const posts = defineCollection({
   name: "Post",
@@ -60,4 +101,18 @@ export default defineConfig({
     clean: true,
   },
   collections: { posts, pages },
+  mdx: {
+    rehypePlugins: [
+      rehypeProtectMermaid,
+      [
+        rehypePrettyCode,
+        {
+          themes: {
+            dark: "github-dark",
+            light: "github-light",
+          },
+        },
+      ],
+    ],
+  },
 })

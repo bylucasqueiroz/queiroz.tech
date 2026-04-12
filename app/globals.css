@@ -29,6 +29,57 @@
   --subtle-border: #1e3a5f;
 }
 
+/* ─── Syntax highlighting (rehype-pretty-code + shiki) ─────────── */
+[data-rehype-pretty-code-figure] pre {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.dark [data-rehype-pretty-code-figure] pre {
+  border-color: #1f2937;
+}
+
+[data-rehype-pretty-code-figure] code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* Apply theme CSS variables based on dark/light */
+[data-rehype-pretty-code-figure] [data-theme="light"] { display: block; }
+[data-rehype-pretty-code-figure] [data-theme="dark"]  { display: none; }
+
+.dark [data-rehype-pretty-code-figure] [data-theme="light"] { display: none; }
+.dark [data-rehype-pretty-code-figure] [data-theme="dark"]  { display: block; }
+
+/* Language label */
+[data-rehype-pretty-code-title] {
+  font-size: 0.75rem;
+  font-family: ui-monospace, monospace;
+  color: #6b7280;
+  padding: 0.4rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: #f9fafb;
+}
+
+.dark [data-rehype-pretty-code-title] {
+  color: #9ca3af;
+  border-color: #1f2937;
+  background: #0d1117;
+}
+
+[data-rehype-pretty-code-title] + pre {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
 /* ─── Base ─────────────────────────────────────────────────────── */
 .prose h2,
 h3,
