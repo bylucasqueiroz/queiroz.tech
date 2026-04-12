@@ -2,6 +2,7 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Analytics } from "@/components/analytics"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ModeToggle } from "@/components/mode-toggle"
 import NavLinks from "@/components/nav-links"
 import GlobalSearch from "@/components/global-search"
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <main>{children}</main>
           </div>
           <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
