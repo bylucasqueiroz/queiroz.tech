@@ -11,7 +11,7 @@ export default function AboutContent() {
   return (
     <div>
       <div className="pt-12 pb-10 mb-10 border-b border-gray-200 dark:border-gray-800">
-        <h1 className="text-[1.75rem] font-normal tracking-[-0.02em] text-slate-900 dark:text-slate-50 leading-none mb-3">
+        <h1 className="text-[1.75rem] font-bold tracking-[-0.03em] text-slate-900 dark:text-slate-50 leading-none mb-3">
           {lang === "en" ? "About" : "Sobre"}
         </h1>
         <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-accent">

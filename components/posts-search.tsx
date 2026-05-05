@@ -67,20 +67,27 @@ export default function PostsSearch({ posts, enPosts = {}, allTags }: PostsSearc
                 <div className="flex flex-col">
                   {byYear[year].map((post) => {
                     const tag = post.tag?.split(",")[0]?.trim()
-                    const date = new Date(post.date).toLocaleDateString("en-US", {
+                    const date = new Date(post.date).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US", {
                       timeZone: "UTC",
                       month: "short",
                       day: "numeric",
                     })
                     return (
                       <Link key={post.slugAsParams} href={post.slug} className="no-underline group">
-                        <article className="flex items-baseline justify-between gap-6 py-2.5 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
-                          <span className="text-[0.875rem] text-slate-700 dark:text-slate-300 group-hover:text-accent transition-colors duration-150 leading-snug">
-                            {post.title}
-                          </span>
-                          <div className="flex items-center gap-4 shrink-0">
+                        <article className="flex items-start justify-between gap-6 py-3 border-b border-gray-200 dark:border-gray-800/50 last:border-0">
+                          <div className="flex flex-col gap-1 min-w-0">
+                            <span className="text-[0.9375rem] font-semibold text-slate-900 dark:text-slate-100 group-hover:text-accent transition-colors duration-150 leading-snug">
+                              {post.title}
+                            </span>
+                            {post.description && (
+                              <span className="text-xs text-gray-500 dark:text-gray-500 leading-snug">
+                                {post.description}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 shrink-0 pt-0.5">
                             {tag && (
-                              <span className="hidden md:inline font-mono text-[10px] tracking-[0.1em] uppercase text-gray-300 dark:text-gray-700">
+                              <span className="hidden md:inline font-mono text-[10px] tracking-[0.1em] uppercase text-gray-400 dark:text-gray-600">
                                 {tag}
                               </span>
                             )}

@@ -10,7 +10,7 @@ export default function HomeHero() {
 
   return (
     <section className="pt-10 pb-8 mb-8">
-      <h1 className="text-[1.75rem] font-normal tracking-[-0.02em] text-slate-900 dark:text-slate-50 leading-none mb-3">
+      <h1 className="text-[1.75rem] font-bold tracking-[-0.03em] text-slate-900 dark:text-slate-50 leading-none mb-3">
         Lucas Queiroz
       </h1>
 

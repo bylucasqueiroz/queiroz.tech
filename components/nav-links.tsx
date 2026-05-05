@@ -24,10 +24,10 @@ export default function NavLinks() {
           <Link
             key={href}
             href={href}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors no-underline ${
+            className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors no-underline ${
               active
                 ? "text-accent bg-subtle"
-                : "text-gray-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-gray-100 dark:hover:bg-gray-800/60"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-gray-100 dark:hover:bg-gray-800/60"
             }`}
           >
             {label}

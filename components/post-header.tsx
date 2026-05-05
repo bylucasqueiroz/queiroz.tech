@@ -13,7 +13,7 @@ interface PostHeaderProps {
 
 export default function PostHeader({ title, description, date, tag }: PostHeaderProps) {
   const { lang } = useLang()
-  const formattedDate = new Date(date).toLocaleDateString("en-US", {
+  const formattedDate = new Date(date).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US", {
     timeZone: "UTC",
     year: "numeric",
     month: "long",
@@ -45,7 +45,7 @@ export default function PostHeader({ title, description, date, tag }: PostHeader
         </div>
       )}
 
-      <h1 className="text-[1.75rem] font-normal tracking-[-0.02em] text-slate-900 dark:text-slate-50 leading-snug mb-3">
+      <h1 className="text-[1.75rem] font-bold tracking-[-0.03em] text-slate-900 dark:text-slate-50 leading-snug mb-3">
         {title}
       </h1>
 

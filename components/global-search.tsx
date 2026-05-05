@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { useLang } from "./language-provider"
 
 interface PostMeta {
   title: string
@@ -18,6 +19,7 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ posts }: GlobalSearchProps) {
   const [open, setOpen] = useState(false)
+  const { lang } = useLang()
   const [query, setQuery] = useState("")
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -148,7 +150,7 @@ export default function GlobalSearch({ posts }: GlobalSearchProps) {
                 <ul>
                   {results.map((post, i) => {
                     const tags = post.tag?.split(",").map((t) => t.trim()).filter(Boolean) ?? []
-                    const formattedDate = new Date(post.date).toLocaleDateString("en-US", {
+                    const formattedDate = new Date(post.date).toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US", {
                       timeZone: "UTC",
                       year: "numeric",
                       month: "short",
@@ -169,7 +171,7 @@ export default function GlobalSearch({ posts }: GlobalSearchProps) {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                           </svg>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-medium leading-snug mb-0.5 ${i === activeIndex ? "text-accent" : "text-slate-800 dark:text-slate-200"}`}>
+                            <p className={`text-sm font-semibold leading-snug mb-0.5 ${i === activeIndex ? "text-accent" : "text-slate-900 dark:text-slate-100"}`}>
                               {highlight(post.title, query)}
                             </p>
                             {post.description && (

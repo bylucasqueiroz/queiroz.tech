@@ -129,7 +129,7 @@ export default async function PostPage({ params }: PostProps) {
                 className="group flex-1 no-underline p-4 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-accent/40 transition-all"
               >
                 <span className="block text-xs text-gray-400 dark:text-gray-600 mb-1">← Older</span>
-                <span className="text-sm font-medium text-slate-800 dark:text-slate-200 group-hover:text-accent transition-colors leading-snug line-clamp-2">
+                <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 group-hover:text-accent transition-colors leading-snug line-clamp-2">
                   {prevPost.title}
                 </span>
               </Link>
@@ -155,7 +155,7 @@ export default async function PostPage({ params }: PostProps) {
         {/* Back to blog */}
         <div className="flex justify-center">
           <Link
-            href="/posts"
+            href="/"
             className="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-accent transition-colors no-underline"
           >
             ← Back to all posts
