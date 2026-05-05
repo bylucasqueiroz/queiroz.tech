@@ -1,63 +1,55 @@
 ---
-title: CI/CD no Github Actions em aplicações .NET 5 com Docker
-description: Configurando CI/CD no Github Actions em aplicações .NET 5 com Docker.
+title: CI/CD in Github Actions for .NET 5 applications with Docker
+description: Setting up CI/CD in Github Actions for .NET 5 applications with Docker.
 date: '2020-12-18'
-language: 'pt'
+language: 'en'
 tag: 'dotnet, docker,github'
-translation: 'dotnet/ci-cd-github-actions-dot-net-5-en'
+translation: 'dotnet/ci-cd-github-actions-dot-net-5'
 ---
 
-Fala pessoal! Sabemos a quantidade de benefícios que encontramos 
-com a implementação de CI/CD, integração contínua em projetos, 
-e o quanto melhora a qualidade das entregas.
+We know how many benefits come with implementing CI/CD and continuous integration in projects, and how much it improves delivery quality.
 
-Neste artigo você verá a implementação de algumas etapas do CI/CD 
-no Github Actions, utilizando .NET 5. Você vai ver que é bem simples 
-a implementação básica, mas não pare neste artigo, você pode implementar 
-muitos outros flows além destes.
+In this article you will see how to implement some CI/CD steps in Github Actions using .NET 5. You will find that the basic implementation is quite straightforward — but don't stop here, there are many other flows you can build beyond these.
 
-## 1. Estruturando o Projeto
+## 1. Structuring the Project
 
-Vamos criar uma WebApi simples que exibe alguns dados de cores. 
-Também adicionaremos um projeto de testes com XUnit, utilizaremos 
-também esse projeto como um dos flows do CI/CD.
+We will create a simple WebApi that displays some color data. We will also add a test project using XUnit, which we will use as one of the CI/CD flows.
 
-### 1.1. Criando Solução
+### 1.1. Creating the Solution
 
 ```bash
 dotnet new sln -n Colors
 ```
 
-### 1.2. Adicionando a WebApi
+### 1.2. Adding the WebApi
 
 ```bash
 dotnet new webapi -n Colors.WebApi
 ```
 
-### 1.3. Adicionando Projeto de Testes
+### 1.3. Adding the Test Project
 
 ```bash
 dotnet new xunit -n Colors.Tests
 ```
 
-### 1.4. Integrando projetos a solução
+### 1.4. Adding projects to the solution
 
 ```bash
 dotnet sln add .\Colors.WebApi\Colors.WebApi.csproj
 dotnet sln add .\Colors.Tests\Colors.Tests.csproj
 ```
 
-### 1.5. Por fim restauramos o projeto
+### 1.5. Restoring the project
 
 ```bash
 dotnet restore
 dotnet build Colors.sln
 ```
 
-## 2. Implementação da WebApi
+## 2. WebApi Implementation
 
-Implementei uma api simples com um repositório de cores, que realiza get e 
-retorna cores. E alguns testes simples. A estrutura do projeto ficou assim:
+I implemented a simple API with a color repository that handles GET requests and returns colors, along with some basic tests. The project structure looks like this:
 
 ### 2.1. ColorController
 
@@ -91,7 +83,7 @@ namespace Colors.WebApi.Controllers
 }
 ```
 
-### 2.2. Model Color
+### 2.2. Color Model
 
 ```csharp title="Color.cs"
 namespace Colors.WebApi.Models
@@ -104,7 +96,7 @@ namespace Colors.WebApi.Models
 }
 ```
 
-### 2.3. Repositório — ColorRepository.
+### 2.3. Repository — ColorRepository
 
 ```csharp title="ColorRepository.cs"
 using System.Collections.Generic;
@@ -128,7 +120,7 @@ namespace Colors.WebApi.Repositories
 }
 ```
 
-### 2.4. Teste— ColorControllerTest.
+### 2.4. Test — ColorControllerTest
 
 ```csharp title="ColorControllerTest.cs"
 using System.Collections.Generic;
@@ -169,14 +161,9 @@ namespace Colors.Tests
 }
 ```
 
-## 3. Configuração do Docker
+## 3. Docker Configuration
 
-Agora vamos configurar o Docker. Crie um arquivo chamado Dockerfile na raiz 
-do projeto. Utilizaremos o [ASP.NET Core Runtime](https://hub.docker.com/_/microsoft-dotnet-aspnet) 
-e o [.NET SDK](https://hub.docker.com/_/microsoft-dotnet-sdk) do .NET 5, que 
-encontramos no [DockerHub](https://hub.docker.com/). Agora vamos inserir os dois projetos criados Colors.Tests 
-e Colors.WebApi, se você tiver mais projetos além desses, poderá inserir, 
-assim também serão compilados. O arquivo ficará assim:
+Now let's configure Docker. Create a file named Dockerfile at the root of the project. We will use the [ASP.NET Core Runtime](https://hub.docker.com/_/microsoft-dotnet-aspnet) and the [.NET SDK](https://hub.docker.com/_/microsoft-dotnet-sdk) for .NET 5, both available on [DockerHub](https://hub.docker.com/). We will include both projects — Colors.Tests and Colors.WebApi — so they are all compiled. The file should look like this:
 
 ```bash
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
@@ -205,43 +192,15 @@ COPY --from=publish /app .
 CMD ASPNETCORE_URLS=http://*:$PORT dotnet Colors.WebApi.dll
 ```
 
-Basicamente o arquivo Dockerfile, descreve uma rotina de publicação 
-que geralmente realizamos manualmente. Ele copiará todo nosso projeto 
-para dentro da imagem, em seguida, restaurará as dependências. 
-Feito isso, é realizado um build no modo release, para por fim, 
-caso tudo esteja correndo bem, realizar a publicação do projeto, 
-que gera os arquivos corretos de publicação, e então executá-lo.
+The Dockerfile essentially describes the publication routine we would normally perform manually. It copies the entire project into the image, restores dependencies, runs a release build, and finally publishes the project — generating the correct output files and running it.
 
-## 4. Configurando o Github Actions no projeto
+## 4. Configuring Github Actions
 
-*Essa etapa, você também poderia ter feito antes de tudo e clonar 
-o projeto, e começar o desenvolvimento a partir dele.*
+*This step could also have been done first — you could have cloned the project and started development from there.*
 
-Supondo que seguiu o fluxo do artigo, você precisará criar um 
-projeto no Github, feito isso, iremos no nosso repositório em Actions:
+Assuming you followed the article flow, you will need to create a project on Github. Once that is done, go to your repository and open the Actions tab.
 
-<Image
-  alt={`Option Menu`}
-  src={`/images/ci-cd-github-actions-dot-net-5/option-menu-github-actions.jpg`}
-  layout="fill"
-  className="!relative"
-/>
-
-Vamos procurar pelo Workflow do .NET:
-
-<Image
-  alt={`Option Menu`}
-  src={`/images/ci-cd-github-actions-dot-net-5/deploy-option-github-actions.jpg`}
-  layout="fill"
-  className="!relative"
-/>
-
-Ele vai gerar um arquivo com extensão (.yml), é nele que suas 
-configurações deverão ser realizadas, aqui você define quais 
-etapas você deseja que seja executada no processo de integração contínua. 
-Como havia falado antes, configuraremos a parte de teste e build utilizando 
-a imagem do Dockerfile que configuramos anteriormente. 
-Modifique o arquivo ele deve ficar assim:
+We will look for the .NET Workflow, which generates a `.yml` file. This is where your configuration lives — you define which steps should run during the continuous integration process. As mentioned, we will configure the test and build steps using the Dockerfile image we set up earlier. Modify the file so it looks like this:
 
 ```yml
 name: .NET 
@@ -269,37 +228,22 @@ steps:
      run: docker build . --file Dockerfile --tag colors-api
 ```
 
-Agora que você configurou seu projeto remoto no Github, 
-e não tenha conectado com o projeto local basta fazer o 
-seguinte, na raiz do seu projeto:
+Now that you have configured your remote Github project, if you have not connected it to your local project yet, run the following from the root of your project:
 
 ```bash
 git init
-git remote add origin {endereço do seu repositório}
+git remote add origin {your repository address}
 git pull
 ```
 
-Pronto, vamos baixar as configurações inseridas e adicionar 
-nossos arquivo e realizar o commit.
+Now download the inserted configurations, add your files, and commit.
 
 ```bash
 git add .
-git commit -m “meu primeiro commit”
+git commit -m "first commit"
 git push -u origin master
 ```
 
-## 5. Conclusão
+## 5. Conclusion
 
-Prontinho, após realizar o commit, você poderá ir no seu projeto no Github Actions, 
-e ver todas as etapas rodando. A utilização de integração contínua em nosso projetos, 
-melhora muito a qualidade das nossas entregas, e implementar isso em projetos pessoais 
-é excelente, e serve de prática.
-
-<Image
-  alt={`Option Menu`}
-  src={`/images/ci-cd-github-actions-dot-net-5/deploy-github-actions-result.jpg`}
-  layout="fill"
-  className="!relative"
-/>
-
-Follow [X/Twitter](https://www.x.com/bylucasqueiroz).
+After committing, you can go to your project in Github Actions and watch all the steps running. Using continuous integration in your projects greatly improves delivery quality — and implementing it in personal projects is excellent practice.

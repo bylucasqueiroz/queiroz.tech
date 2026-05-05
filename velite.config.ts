@@ -1,5 +1,7 @@
 import { defineConfig, defineCollection, s } from "velite"
 import rehypePrettyCode from "rehype-pretty-code"
+import rehypeKatex from "rehype-katex"
+import remarkMath from "remark-math"
 import type { Root, Element } from "hast"
 
 // Runs BEFORE rehype-pretty-code: converts <pre><code class="language-mermaid">
@@ -52,6 +54,7 @@ const posts = defineCollection({
       tag: s.string().optional(),
       language: s.string().optional(),
       image: s.string().optional(),
+      translation: s.string().optional(),
       content: s.mdx(),
     })
     .transform((data, { meta }) => {
@@ -102,8 +105,10 @@ export default defineConfig({
   },
   collections: { posts, pages },
   mdx: {
+    remarkPlugins: [remarkMath],
     rehypePlugins: [
       rehypeProtectMermaid,
+      rehypeKatex,
       [
         rehypePrettyCode,
         {

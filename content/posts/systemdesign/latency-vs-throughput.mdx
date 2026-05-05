@@ -1,16 +1,17 @@
 ---
-title: "Latency vs Throughput"
-description: "Understanding these system design metrics"
+title: "Latência vs Throughput"
+description: "Entendendo essas métricas de system design"
 date: "2025-12-01"
 tag: "systemdesign"
-language: "en"
+language: "pt"
+translation: "systemdesign/latency-vs-throughput-en"
 ---
 
-We have two different terms that are usually used when we are talking about our system behavior. These terms are Latency and Throughput, very common in system design conversations.
+Temos dois termos diferentes que costumam aparecer quando falamos sobre o comportamento dos nossos sistemas. Esses termos são Latência e Throughput — muito comuns em conversas sobre system design.
 
-Let’s understand the difference between them.
+Vamos entender a diferença entre eles.
 
-## Latency
+## Latência
 
 <Image
   alt={`Option Menu`}
@@ -19,13 +20,13 @@ Let’s understand the difference between them.
   className="!relative"
 />
 
-Latency is the time necessary to perform an action or return a result. It is very common to talk about latency when we are talking about an API, we usually think and discuss about how much time is necessary from request initiation to response completion. This is latency. We classify that metric with units of time, like milliseconds, microseconds, seconds, etc.
+Latência é o tempo necessário para realizar uma ação ou retornar um resultado. É muito comum falar sobre latência ao discutir uma API — geralmente pensamos em quanto tempo é necessário desde o início da requisição até a conclusão da resposta. Isso é latência. Classificamos essa métrica com unidades de tempo, como milissegundos, microssegundos, segundos, etc.
 
-If a service has low latency, it means that the result was gotten faster after a call, on the other hand, if we have high latency we don’t have a system that will answer faster.
+Se um serviço tem baixa latência, significa que o resultado foi obtido mais rapidamente após uma chamada. Por outro lado, se temos alta latência, não temos um sistema que responde com agilidade.
 
-Many things can generate high latency, like infrastructure and network issues, application-level problems, database issues and more.
+Muitas coisas podem gerar alta latência, como problemas de infraestrutura e rede, problemas no nível da aplicação, problemas de banco de dados e outros.
 
-For example, we can have network congestion because of the amount of traffic passing through the same link, or thinking about the application level, we can have an application where each operation tries to read multiple times the same value that never changes in the database.
+Por exemplo, podemos ter congestionamento de rede devido ao volume de tráfego passando pelo mesmo link. Ou, pensando no nível da aplicação, podemos ter uma aplicação onde cada operação tenta ler múltiplas vezes o mesmo valor que nunca muda no banco de dados.
 
 ## Throughput
 
@@ -36,14 +37,12 @@ For example, we can have network congestion because of the amount of traffic pas
   className="!relative"
 />
 
-Talking about throughput, we want to know how much time is necessary to execute an amount of transactions, different from latency, with this metric we want to know the units. It is common to hear how many Transactions Per Second (TPS), or Requests Per Second (RPS) our service can handle.
+Falando sobre throughput, queremos saber quantas transações o sistema consegue processar por unidade de tempo. Diferente da latência, com essa métrica nos interessa a quantidade. É comum ouvir quantas Transações Por Segundo (TPS), ou Requisições Por Segundo (RPS) nosso serviço consegue processar.
 
-A service with low throughput is a service that can’t handle a high number of transactions per time, and that behavior in architectures that need high performance can be a problem. Instead, a high-throughput service means that it can handle a high number of transactions per time.
+Um serviço com baixo throughput é um serviço que não consegue lidar com um grande número de transações por tempo — e esse comportamento em arquiteturas que precisam de alta performance pode ser um problema. Um serviço de alto throughput, por sua vez, significa que ele consegue lidar com um grande número de transações por unidade de tempo.
 
-We have problems that reduce throughput in systems too, some of them are infrastructure and hardware bottlenecks, like CPU saturation, insufficient memory, limited network bandwidth and more. We can have also application-level issues like inefficient concurrency implementation, or expensive operations inside requests, like large JSON parsing for example.
+Também temos problemas que reduzem o throughput nos sistemas. Alguns deles são gargalos de infraestrutura e hardware, como saturação de CPU, memória insuficiente, largura de banda de rede limitada e outros. Também podemos ter problemas no nível da aplicação, como implementação ineficiente de concorrência, ou operações custosas dentro das requisições — como o parsing de JSONs muito grandes, por exemplo.
 
-## Conclusion
+## Conclusão
 
-Latency is the time for one request. Throughput is how many requests per second the system can do. Increasing throughput usually requires batching, and concurrency, all of which add waiting time and increase latency. So, usually you choose based on the nature of your workload. For example, if you need a real-time system, you need to optimize latency, but if you need a high-volume of processing, you need to optimize throughput.
-
-Thanks for reading it :)
+Latência é o tempo para uma requisição. Throughput é quantas requisições por segundo o sistema consegue processar. Aumentar o throughput geralmente exige batching e concorrência — o que adiciona tempo de espera e aumenta a latência. Por isso, normalmente você escolhe com base na natureza do seu workload. Por exemplo, se você precisa de um sistema em tempo real, precisa otimizar a latência. Mas se você precisa de alto volume de processamento, precisa otimizar o throughput.

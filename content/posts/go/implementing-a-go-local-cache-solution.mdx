@@ -1,9 +1,10 @@
 ---
-title: 'Implementing a Go local cache solution'
-description: 'How to implement a cache solution that scales in Go that you can reuse across multiple applications.'
+title: 'Implementando uma solução de cache local em Go'
+description: 'Como implementar uma solução de cache em Go que escala e pode ser reutilizada em múltiplas aplicações.'
 date: '2026-02-17'
 tag: 'go'
-language: 'en'
+language: 'pt'
+translation: 'go/implementing-a-go-local-cache-solution-en'
 ---
 
 <Image
@@ -13,15 +14,15 @@ language: 'en'
   className="!relative"
 />
 
-Cache can be used in multiple scenarios, especially when you want to have a layer between your service and a database or a second service that always returns the same information for a period of time, like an API or something like that. In some cases, it can be necessary to use a distributed cache like Redis, where you will have a cluster to store your data. This happens especially when you are working with multiple services running at the same time, with many replicas like pods or tasks.
+Cache pode ser usado em múltiplos cenários, especialmente quando você quer ter uma camada entre seu serviço e um banco de dados ou um segundo serviço que sempre retorna a mesma informação por um período de tempo — como uma API ou algo semelhante. Em alguns casos, pode ser necessário usar um cache distribuído como o Redis, onde você terá um cluster para armazenar seus dados. Isso acontece especialmente quando você trabalha com múltiplos serviços rodando ao mesmo tempo, com muitas réplicas como pods ou tasks.
 
-Considering that you have the necessity to control the cache locally in the application before going to an external service, or if you have a service that is temporarily unavailable and you can’t reach it, a local cache can be a good fit for that situation, allowing your service to keep working without external information for a period of time, until the primary service becomes available again.
+Considerando que você tem a necessidade de controlar o cache localmente na aplicação antes de ir a um serviço externo, ou se você tem um serviço temporariamente indisponível e não consegue alcançá-lo, um cache local pode ser uma boa solução — permitindo que seu serviço continue funcionando sem informações externas por um período de tempo, até que o serviço primário fique disponível novamente.
 
-So thinking about that, I decided to share a Go example of a local cache implementation. Let’s break it down.
+Pensando nisso, decidi compartilhar um exemplo em Go de implementação de cache local. Vamos analisar cada parte.
 
-## The principal structure
+## A estrutura principal
 
-First of all, we will create a simple struct that will be used as our template to store data in memory. It’s simple, we just have a value whose type is interface{}.
+Em primeiro lugar, vamos criar uma struct simples que será usada como template para armazenar dados em memória. É simples — temos apenas um valor cujo tipo é `interface{}`.
 
 ``` go
 type localCacheItem struct {
@@ -30,7 +31,7 @@ type localCacheItem struct {
 }
 ```
 
-The second important part is that our cache needs to be safe when we have multiple concurrent executions consuming it. Here, we will use an RWMutex to ensure mutual exclusion. [The lock can be held by multiple readers or a single writer](https://go.dev/src/sync/rwmutex.go). It ensures that all goroutines access the data safely. You can read more about Mutex [here](https://queiroz.tech/posts/go/how-to-ensure-thread-safeness-in-go).
+A segunda parte importante é que nosso cache precisa ser seguro quando temos múltiplas execuções concorrentes consumindo-o. Aqui, usaremos um RWMutex para garantir a exclusão mútua. [O lock pode ser mantido por múltiplos leitores ou por um único escritor](https://go.dev/src/sync/rwmutex.go). Isso garante que todas as goroutines acessem os dados com segurança. Você pode ler mais sobre Mutex [aqui](https://queiroz.tech/posts/go/how-to-ensure-thread-safeness-in-go).
 
 ``` go
 type LocalCache struct {
@@ -40,15 +41,15 @@ type LocalCache struct {
 }
 ```
 
-As you can see, to complement the explanation about the struct, we have a map where the key type is string and the value type is our localCacheItem. To finish, we have a TTL (Time To Live) expiration to define after how much time our entry will expire.
+Como você pode ver, para complementar a explicação sobre a struct, temos um map onde o tipo da chave é string e o tipo do valor é nosso `localCacheItem`. Para finalizar, temos um TTL (Time To Live) para definir após quanto tempo nossa entrada expirará.
 
-## Methods
+## Métodos
 
-We will have four methods: Get, Set, Clear and CleanExpired. There are some implementations that are common between them. In each method, we start by locking before getting, setting or cleaning our data, to prevent inconsistencies between concurrent executions, and when the process finishes, using defer, we ensure that the lock is released.
+Teremos quatro métodos: Get, Set, Clear e CleanExpired. Há algumas implementações em comum entre eles. Em cada método, começamos bloqueando antes de obter, definir ou limpar nossos dados, para evitar inconsistências entre execuções concorrentes. Quando o processo finaliza, usando `defer`, garantimos que o lock seja liberado.
 
-## The Get method
+## O método Get
 
-Here we try to retrieve our data by the key, and if it doesn’t exist or the found item is expired, we just return false to the caller. Otherwise, we return the information that has been found in the cache.
+Aqui tentamos recuperar nossos dados pela chave. Se o item não existir ou estiver expirado, retornamos `false` para o chamador. Caso contrário, retornamos a informação encontrada no cache.
 
 ``` go
 func (c *LocalCache) Get(key string) (interface{}, bool) {
@@ -68,9 +69,9 @@ func (c *LocalCache) Get(key string) (interface{}, bool) {
 }
 ```
 
-## The Set Method
+## O método Set
 
-That is really simple, we just create a key in our map, setting our key value with an expiration time defined.
+É bastante simples — criamos uma chave no nosso map, definindo o valor da chave com um tempo de expiração.
 
 ``` go
 func (c *LocalCache) Set(key string, value interface{}) {
@@ -84,9 +85,9 @@ func (c *LocalCache) Set(key string, value interface{}) {
 }
 ```
 
-## The Clean Method
+## O método Clear
 
-Here we have the option to clean our cache and reset all information inside the in-memory map. It's like a restart.
+Aqui temos a opção de limpar nosso cache e resetar todas as informações dentro do map em memória. É como um reinício.
 
 ``` go
 func (c *LocalCache) Clear() {
@@ -97,9 +98,9 @@ func (c *LocalCache) Clear() {
 }
 ```
 
-## The CleanExpired Method
+## O método CleanExpired
 
-That is a very important method. We can’t just leave all data inside memory without control. If you have a service that processes millions of entries, you won’t want to keep everything in memory. Because of that, we defined an expiration time to remove all expired data from the service memory.
+Este é um método muito importante. Não podemos simplesmente deixar todos os dados na memória sem controle. Se você tem um serviço que processa milhões de entradas, não vai querer manter tudo em memória. Por isso, definimos um tempo de expiração para remover todos os dados expirados da memória do serviço.
 
 ``` go
 func (c *LocalCache) CleanExpired() {
@@ -115,9 +116,9 @@ func (c *LocalCache) CleanExpired() {
 }
 ```
 
-## The implementation
+## A implementação completa
 
-Now you can see all the implementation here.
+Agora você pode ver toda a implementação.
 
 ``` go
 package cache
@@ -191,6 +192,6 @@ func (c *LocalCache) CleanExpired() {
 }
 ```
 
-## Conclusion
+## Conclusão
 
-Now you can see that it is simple to implement a Go local cache and use it in your services. Thanks for reading :)
+Agora você pode ver como é simples implementar um cache local em Go e utilizá-lo nos seus serviços.

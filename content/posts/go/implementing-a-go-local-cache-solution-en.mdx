@@ -1,0 +1,197 @@
+---
+title: 'Implementing a Go local cache solution'
+description: 'How to implement a cache solution that scales in Go that you can reuse across multiple applications.'
+date: '2026-02-17'
+tag: 'go'
+language: 'en'
+translation: 'go/implementing-a-go-local-cache-solution'
+---
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/implementing-a-go-local-cache-solution/implementing-a-go-local-cache-solution.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Cache can be used in multiple scenarios, especially when you want to have a layer between your service and a database or a second service that always returns the same information for a period of time, like an API or something like that. In some cases, it can be necessary to use a distributed cache like Redis, where you will have a cluster to store your data. This happens especially when you are working with multiple services running at the same time, with many replicas like pods or tasks.
+
+Considering that you have the necessity to control the cache locally in the application before going to an external service, or if you have a service that is temporarily unavailable and you can’t reach it, a local cache can be a good fit for that situation, allowing your service to keep working without external information for a period of time, until the primary service becomes available again.
+
+So thinking about that, I decided to share a Go example of a local cache implementation. Let’s break it down.
+
+## The principal structure
+
+First of all, we will create a simple struct that will be used as our template to store data in memory. It’s simple, we just have a value whose type is interface{}.
+
+``` go
+type localCacheItem struct {
+    value interface{}
+    expiresAt time.Time
+}
+```
+
+The second important part is that our cache needs to be safe when we have multiple concurrent executions consuming it. Here, we will use an RWMutex to ensure mutual exclusion. [The lock can be held by multiple readers or a single writer](https://go.dev/src/sync/rwmutex.go). It ensures that all goroutines access the data safely. You can read more about Mutex [here](https://queiroz.tech/posts/go/how-to-ensure-thread-safeness-in-go).
+
+``` go
+type LocalCache struct {
+    mu sync.RWMutex
+    items map[string]*localCacheItem
+    ttl time.Duration
+}
+```
+
+As you can see, to complement the explanation about the struct, we have a map where the key type is string and the value type is our localCacheItem. To finish, we have a TTL (Time To Live) expiration to define after how much time our entry will expire.
+
+## Methods
+
+We will have four methods: Get, Set, Clear and CleanExpired. There are some implementations that are common between them. In each method, we start by locking before getting, setting or cleaning our data, to prevent inconsistencies between concurrent executions, and when the process finishes, using defer, we ensure that the lock is released.
+
+## The Get method
+
+Here we try to retrieve our data by the key, and if it doesn’t exist or the found item is expired, we just return false to the caller. Otherwise, we return the information that has been found in the cache.
+
+``` go
+func (c *LocalCache) Get(key string) (interface{}, bool) {
+   c.mu.RLock()
+   defer c.mu.RUnlock()
+  
+   item, exists := c.items[key]
+   if !exists {
+    return nil, false
+   }
+  
+   if time.Now().After(item.expiresAt) {
+    return nil, false
+   }
+  
+   return item.value, true
+}
+```
+
+## The Set Method
+
+That is really simple, we just create a key in our map, setting our key value with an expiration time defined.
+
+``` go
+func (c *LocalCache) Set(key string, value interface{}) {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items[key] = &localCacheItem{
+    value:     value,
+    expiresAt: time.Now().Add(c.ttl),
+   }
+}
+```
+
+## The Clean Method
+
+Here we have the option to clean our cache and reset all information inside the in-memory map. It's like a restart.
+
+``` go
+func (c *LocalCache) Clear() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items = make(map[string]*localCacheItem)
+}
+```
+
+## The CleanExpired Method
+
+That is a very important method. We can’t just leave all data inside memory without control. If you have a service that processes millions of entries, you won’t want to keep everything in memory. Because of that, we defined an expiration time to remove all expired data from the service memory.
+
+``` go
+func (c *LocalCache) CleanExpired() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   now := time.Now()
+   for key, item := range c.items {
+    if now.After(item.expiresAt) {
+     delete(c.items, key)
+    }
+   }
+}
+```
+
+## The implementation
+
+Now you can see all the implementation here.
+
+``` go
+package cache
+
+import (
+ "sync"
+ "time"
+)
+
+type localCacheItem struct {
+    value interface{}
+    expiresAt time.Time
+}
+
+type LocalCache struct {
+    mu sync.RWMutex
+    items map[string]*localCacheItem
+    ttl time.Duration
+}
+
+func New(ttl time.Duration) *LocalCache {
+   return &LocalCache{
+    items: make(map[string]*localCacheItem),
+    ttl:   ttl,
+   }
+}
+
+func (c *LocalCache) Get(key string) (interface{}, bool) {
+   c.mu.RLock()
+   defer c.mu.RUnlock()
+  
+   item, exists := c.items[key]
+   if !exists {
+    return nil, false
+   }
+  
+   if time.Now().After(item.expiresAt) {
+    return nil, false
+   }
+  
+   return item.value, true
+}
+
+func (c *LocalCache) Set(key string, value interface{}) {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items[key] = &localCacheItem{
+    value:     value,
+    expiresAt: time.Now().Add(c.ttl),
+   }
+}
+
+func (c *LocalCache) Clear() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items = make(map[string]*localCacheItem)
+}
+
+func (c *LocalCache) CleanExpired() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   now := time.Now()
+   for key, item := range c.items {
+    if now.After(item.expiresAt) {
+     delete(c.items, key)
+    }
+   }
+}
+```
+
+## Conclusion
+
+Now you can see that it is simple to implement a Go local cache and use it in your services. Thanks for reading :)

@@ -1,0 +1,50 @@
+---
+title: "Latency vs Throughput"
+description: "Understanding these system design metrics"
+date: "2025-12-01"
+tag: "systemdesign"
+language: "en"
+translation: "systemdesign/latency-vs-throughput-pt"
+---
+
+We have two different terms that are usually used when we are talking about our system behavior. These terms are Latency and Throughput, very common in system design conversations.
+
+Let’s understand the difference between them.
+
+## Latency
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/latency-vs-throughput/latency.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Latency is the time necessary to perform an action or return a result. It is very common to talk about latency when we are talking about an API, we usually think and discuss about how much time is necessary from request initiation to response completion. This is latency. We classify that metric with units of time, like milliseconds, microseconds, seconds, etc.
+
+If a service has low latency, it means that the result was gotten faster after a call, on the other hand, if we have high latency we don’t have a system that will answer faster.
+
+Many things can generate high latency, like infrastructure and network issues, application-level problems, database issues and more.
+
+For example, we can have network congestion because of the amount of traffic passing through the same link, or thinking about the application level, we can have an application where each operation tries to read multiple times the same value that never changes in the database.
+
+## Throughput
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/latency-vs-throughput/throughput.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Talking about throughput, we want to know how much time is necessary to execute an amount of transactions, different from latency, with this metric we want to know the units. It is common to hear how many Transactions Per Second (TPS), or Requests Per Second (RPS) our service can handle.
+
+A service with low throughput is a service that can’t handle a high number of transactions per time, and that behavior in architectures that need high performance can be a problem. Instead, a high-throughput service means that it can handle a high number of transactions per time.
+
+We have problems that reduce throughput in systems too, some of them are infrastructure and hardware bottlenecks, like CPU saturation, insufficient memory, limited network bandwidth and more. We can have also application-level issues like inefficient concurrency implementation, or expensive operations inside requests, like large JSON parsing for example.
+
+## Conclusion
+
+Latency is the time for one request. Throughput is how many requests per second the system can do. Increasing throughput usually requires batching, and concurrency, all of which add waiting time and increase latency. So, usually you choose based on the nature of your workload. For example, if you need a real-time system, you need to optimize latency, but if you need a high-volume of processing, you need to optimize throughput.
+
+Thanks for reading it :)

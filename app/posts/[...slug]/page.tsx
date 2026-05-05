@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Metadata } from "next"
 import { Mdx } from "@/components/mdx-components"
 import PostHeader from "@/components/post-header"
+import LanguageRedirect from "@/components/language-redirect"
 
 type StaticParams = { slug: string[] }
 type PageParams = Promise<StaticParams | undefined>
@@ -105,12 +106,12 @@ export default async function PostPage({ params }: PostProps) {
         }}
       />
 
+      <LanguageRedirect postLang={post.language} translation={post.translation} />
       <PostHeader
         title={post.title}
         description={post.description}
         date={post.date}
         tag={post.tag}
-        language={post.language}
       />
 
       <article className="prose dark:prose-invert max-w-none">
