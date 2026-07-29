@@ -73,8 +73,9 @@ export default async function PostPage({ params }: PostProps) {
     notFound()
   }
 
-  // Find adjacent posts for prev/next navigation
-  const sorted = [...posts].sort(
+  // Find adjacent posts for prev/next navigation within the same language
+  const sameLanguagePosts = posts.filter((entry) => entry.language === post.language)
+  const sorted = [...sameLanguagePosts].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
   const currentIndex = sorted.findIndex((p) => p.slugAsParams === post.slugAsParams)
