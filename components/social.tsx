@@ -3,6 +3,7 @@ export default function Social() {
     { name: "@bylucasqueiroz", url: "https://x.com/bylucasqueiroz" },
     { name: "linkedin", url: "https://www.linkedin.com/in/bylucasqueiroz" },
     { name: "github", url: "https://github.com/bylucasqueiroz" },
+    { name: "youtube", url: "https://www.youtube.com/@bylucasqueiroz?sub_confirmation=1" },
   ]
 
   return (
