@@ -111,13 +111,13 @@ Perceba que o Exponential Backoff não reduz a quantidade de tentativas realizad
 
 A implementação do Exponential Backoff é extremamente simples. Na prática, a única diferença em relação a um Retry tradicional está na forma como o tempo de espera entre as tentativas é calculado.
 
-Em uma estratégia de  Retry com intervalo fixo , todas as tentativas aguardam exatamente o mesmo período antes de serem executadas novamente.
+Em uma estratégia de  Retry com intervalo fixo, todas as tentativas aguardam exatamente o mesmo período antes de serem executadas novamente.
 
 ```go
 delay := baseDelay
 ```
 
-Em uma estratégia de  Retry com intervalo incremental , o tempo de espera cresce linearmente.
+Em uma estratégia de  Retry com intervalo incremental,  o tempo de espera cresce linearmente.
 
 ```go
 delay := baseDelay * time.Duration(retryCount)
@@ -136,8 +136,6 @@ delay := backoff
 ```
 
 Perceba que poucas linhas de código são suficientes para alterar completamente o comportamento da aplicação. Em vez de executar novas tentativas em intervalos constantes, o sistema passa a reduzir gradualmente a frequência das requisições, diminuindo a pressão sobre dependências degradadas e aumentando suas chances de recuperação.
-
-No próximo artigo evoluiremos essa implementação adicionando  Jitter , uma pequena variação aleatória sobre o tempo calculado pelo Exponential Backoff que evita que milhares de clientes realizem novas tentativas exatamente no mesmo instante.
 
 ## Limitações do Exponential Backoff
 
@@ -180,13 +178,13 @@ Existem diferentes estratégias para adicionar aleatoriedade ao cálculo do Back
 
 -  Full Jitter:  sorteia um valor aleatório entre 0 (zero) e o Backoff calculado. É a estratégia mais utilizada por reduzir significativamente a sincronização entre clientes.
 -  Equal Jitter:  mantém parte do tempo de espera calculado e aplica aleatoriedade apenas sobre a outra metade, evitando tempos muito pequenos.
--  Decorrelated Jitter:  utiliza o atraso anterior para calcular o próximo intervalo, produzindo tempos mais imprevisíveis e evitando sincronização entre clientes durante longos períodos.
+-  Decorrelated Jitter: utiliza o atraso anterior para calcular o próximo intervalo, produzindo tempos mais imprevisíveis e evitando sincronização entre clientes durante longos períodos.
 
-Neste artigo utilizamos o  Full Jitter , por ser a abordagem mais simples e também a recomendada em diversas documentações, como as da [AWS](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/).
+Neste artigo utilizamos o  Full Jitter, por ser a abordagem mais simples e também a recomendada em diversas documentações, como as da [AWS](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/).
 
 ## Conclusão
 
-O Retry continua sendo um dos mecanismos mais importantes para lidar com falhas transitórias. Entretanto, como vimos neste artigo, a estratégia utilizada para definir o intervalo entre as tentativas faz toda a diferença. O Exponential Backoff reduz significativamente a pressão sobre sistemas degradados e hoje é amplamente utilizado em arquiteturas distribuídas modernas. Ainda assim, quando milhares de clientes executam o mesmo algoritmo simultaneamente, novos picos de tráfego podem surgir. É justamente esse cenário que motiva a utilização do Jitter, assunto que abordaremos no próximo artigo.
+O Retry continua sendo um dos mecanismos mais importantes para lidar com falhas transitórias. Entretanto, como vimos neste artigo, a estratégia utilizada para definir o intervalo entre as tentativas faz toda a diferença. O Exponential Backoff reduz significativamente a pressão sobre sistemas degradados e hoje é amplamente utilizado em arquiteturas distribuídas modernas. Ainda assim, quando milhares de clientes executam o mesmo algoritmo simultaneamente, novos picos de tráfego podem surgir. É justamente esse cenário que motiva a utilização do Jitter.
 
 ## Referências
 

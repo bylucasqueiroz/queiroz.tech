@@ -138,8 +138,6 @@ delay := backoff
 
 Notice that only a few lines of code are enough to completely change the behavior of the application. Instead of executing new attempts at constant intervals, the system starts to gradually reduce the frequency of requests, lowering pressure on degraded dependencies and increasing their chances of recovery.
 
-In the next article we will evolve this implementation by adding Jitter, a small random variation on the time calculated by Exponential Backoff that prevents thousands of clients from retrying at exactly the same moment.
-
 ## Limitations of Exponential Backoff
 
 Despite its benefits, Exponential Backoff does not solve every problem related to Retry. Although it significantly reduces pressure on the service, Exponential Backoff still has an important limitation: different clients continue calculating exactly the same intervals between attempts. As a result, thousands of applications may start making new requests at practically the same moment, creating new traffic spikes.
@@ -187,7 +185,7 @@ In this article we use Full Jitter because it is the simplest approach and also 
 
 ## Conclusion
 
-Retry remains one of the most important mechanisms for dealing with transient failures. However, as we saw in this article, the strategy used to define the interval between attempts makes all the difference. Exponential Backoff significantly reduces pressure on degraded systems and is now widely used in modern distributed architectures. Even so, when thousands of clients run the same algorithm simultaneously, new traffic spikes can still emerge. That is exactly the scenario that motivates Jitter, which we will cover in the next article.
+Retry remains one of the most important mechanisms for dealing with transient failures. However, as we saw in this article, the strategy used to define the interval between attempts makes all the difference. Exponential Backoff significantly reduces pressure on degraded systems and is now widely used in modern distributed architectures. Even so, when thousands of clients run the same algorithm simultaneously, new traffic spikes can still emerge. That is exactly the scenario that motivates Jitter.
 
 ## References
 
