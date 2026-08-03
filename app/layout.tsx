@@ -17,6 +17,10 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Lucas Queiroz",
   description: "Writing about distributed systems, reliability engineering, and the operational complexity of building things that need to stay alive.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
