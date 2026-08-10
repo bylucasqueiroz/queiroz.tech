@@ -1,0 +1,157 @@
+---
+title: "Circuit Breaker: quando parar de tentar?"
+description: "Entendendo o padrão de resiliência Circuit Breaker e quando utilizá-lo."
+image: "/images/resiliency-circuit-breaker-when-should-you-stop-trying/post.png"
+date: "2026-08-05"
+tag: "system design"
+language: "pt"
+translation: "systemdesign/resiliency-circuit-breaker-when-should-you-stop-trying-en"
+---
+
+<Image
+  alt={`post`}
+  src={`/images/resiliency-circuit-breaker-when-should-you-stop-trying/circuit-breaker-post.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Nós começamos uma série de artigos sobre padrões de resiliência. Primeiro falamos sobre [Retry](/posts/systemdesign/resiliency-why-retries-can-bring-down-your-system), depois vimos como o [Exponential Backoff](/posts/systemdesign/resiliency-exponencial-backoff-in-practice) reduz a pressão causada pelas retentativas e, por fim, conhecemos o [Jitter](/posts/systemdesign/resiliency-exponencial-backoff-in-practice), responsável por distribuir essas tentativas ao longo do tempo.
+
+Ao longo desses artigos, o foco sempre foi lidar com falhas transitórias. Mas existe uma pergunta importante que ainda não respondemos completamente: Até quando devemos continuar tentando?
+
+Se uma dependência permanece indisponível por um longo período, continuar executando Retry deixa de ser uma estratégia de recuperação e passa a desperdiçar recursos da própria aplicação. É justamente para responder essa pergunta que existe o Circuit Breaker.
+
+Neste artigo gostaria de compartilhar como esse padrão funciona, quais problemas ele resolve e por que normalmente ele é utilizado em conjunto com Retry e Exponential Backoff.
+
+## De onde veio o conceito de Circuit Breaker?
+
+O conceito de Circuit Breaker vem literalmente dos disjuntores utilizados em circuitos elétricos. Quando ocorre uma sobrecarga, um curto-circuito ou uma variação inesperada de tensão, o disjuntor abre o circuito, interrompendo imediatamente a passagem da corrente elétrica. O objetivo é proteger toda a instalação elétrica contra danos maiores.
+
+<Image
+  alt={`post`}
+  src={`/images/resiliency-circuit-breaker-when-should-you-stop-trying/real-electrical-circuit.png`}
+  layout="fill"
+  className="!relative"
+  size="100vw"
+/>
+
+Essa analogia é bastante conhecida e aparece em praticamente todos os materiais sobre Circuit Breaker. Entretanto, gostaria de trazer essa ideia para um contexto mais prático de sistemas distribuídos.
+
+Falando de engenharia de software, em vez de interromper a passagem de corrente elétrica, o Circuit Breaker interrompe temporariamente novas chamadas para uma dependência que está apresentando falhas consecutivas.
+
+Seu objetivo é exatamente o mesmo: proteger o restante da aplicação contra os efeitos provocados por uma dependência degradada.
+
+## O problema que o Circuit Breaker resolve
+
+Nos artigos anteriores vimos que Retry e Exponential Backoff são excelentes para recuperar falhas temporárias.
+
+Mas imagine um cenário diferente:
+- API externa ficou indisponível durante quinze minutos.
+- Banco de dados sofreu uma interrupção completa.
+- Broker de mensageria ficou inacessível.
+
+Mesmo utilizando Retry com Exponential Backoff, todas as aplicações continuarão tentando estabelecer comunicação. Essas tentativas serão menos frequentes, porém continuarão acontecendo.
+
+Em determinado momento precisamos reconhecer que aquela dependência não será recuperada em poucos segundos e que continuar insistindo apenas desperdiça CPU, conexões, memória, threads e aumenta a latência da própria aplicação.
+
+É nesse momento que o Circuit Breaker entra em ação. Em vez de permitir novas tentativas continuamente, ele interrompe temporariamente as chamadas para essa dependência, permitindo que ela tenha tempo suficiente para se recuperar.
+
+Além disso, ao impedir novas chamadas, reduzimos significativamente a possibilidade de propagar a falha para outros componentes da arquitetura, evitando o conhecido efeito cascata (Cascading Failure). Onde uma falha é propagada para outros serviços, degradando toda a arquitetura.
+
+## Os estados do Circuit Breaker
+
+O funcionamento do Circuit Breaker é baseado em três estados: closed, open, half-open.
+
+<Image
+  alt={`post`}
+  src={`/images/resiliency-circuit-breaker-when-should-you-stop-trying/circuit-breaker-diagram.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+### Closed
+
+O estado Closed representa o funcionamento normal da aplicação. Todas as requisições passam normalmente pela dependência. Ao mesmo tempo, o Circuit Breaker monitora continuamente a quantidade de falhas ocorridas. Enquanto essa quantidade permanecer abaixo do limite configurado (**Failure Threshold**), nenhuma ação é tomada.
+
+### Open
+
+Quando a quantidade de falhas consecutivas ultrapassa esse limite, o circuito é aberto. A partir desse momento nenhuma nova chamada é enviada para a dependência. Em vez disso, todas as requisições falham imediatamente, retornando um erro indicando que o Circuit Breaker está aberto. Ao interromper temporariamente novas chamadas, reduzimos drasticamente a carga exercida sobre uma dependência que já se encontra degradada.
+
+### Half Open
+
+Após permanecer aberto durante um determinado período (**Open Timeout**), o Circuit Breaker entra no estado Half Open. Esse estado funciona como um período controlado de testes. Em vez de liberar todas as requisições novamente, apenas uma quantidade limitada de chamadas é permitida. 
+
+Caso essas chamadas sejam processadas com sucesso, o Circuit Breaker entende que a dependência voltou a operar normalmente e retorna ao estado Closed. Caso as falhas persistam, o circuito volta imediatamente ao estado Open, reiniciando o tempo de espera.
+
+## Como isso funciona na prática?
+
+Imagine um serviço responsável por consumir mensagens de uma fila SQS.
+
+1. Em determinado momento, o banco de dados utilizado para persistir essas mensagens torna-se indisponível.
+2. Sem Circuit Breaker, o consumidor continuará processando mensagens normalmente.
+3. Cada mensagem resultará em uma tentativa de gravação.
+4. Cada tentativa falhará.
+5. Novos retries serão executados.
+6. Novas mensagens continuarão sendo consumidas.
+
+<Image
+  alt={`post`}
+  src={`/images/resiliency-circuit-breaker-when-should-you-stop-trying/without-circuit-breaker-flow.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+O resultado é que rapidamente teremos um grande volume de requisições falhando simultaneamente, tentando acessar o banco de dados indisponível.
+
+Agora imagine exatamente o mesmo cenário utilizando Circuit Breaker.
+
+1. Após atingir o limite configurado de falhas consecutivas, o circuito será aberto.
+2. A partir desse momento, novas tentativas de processamento que dependem do banco de dados são temporariamente bloqueadas pelo Circuit Breaker.
+3. As mensagens que ainda não foram processadas permanecem disponíveis na fila, enquanto o banco de dados se recupera.
+4. Depois do tempo configurado, o circuito entra no estado Half-Open e permite um número limitado de tentativas de processamento.
+5. Se as tentativas forem bem-sucedidas, o circuito volta para Closed e o processamento continua normalmente.
+6. Caso contrário, o circuito volta para o estado Open e um novo período de espera é iniciado.
+
+<Image
+  alt={`post`}
+  src={`/images/resiliency-circuit-breaker-when-should-you-stop-trying/with-circuit-breaker-flow.png`}
+  layout="fill"
+  className="!relative"
+  />
+
+Perceba que o objetivo não é abandonar o processamento, mas sim impedir que uma dependência degradada continue sendo pressionada desnecessariamente.
+
+## Thresholds e monitoramento
+
+Para que o Circuit Breaker funcione corretamente, alguns parâmetros precisam ser definidos.
+
+Entre eles podemos destacar:
+
+- **Failure Threshold**, responsável por definir quantas falhas consecutivas são necessárias para abrir o circuito.
+- **Open Timeout**, responsável por definir quanto tempo o circuito permanecerá aberto antes de entrar em Half Open.
+- **Success Threshold**, utilizado por algumas implementações para definir quantas chamadas bem-sucedidas são necessárias antes de fechar completamente o circuito.
+
+Outro ponto extremamente importante é a observabilidade.
+
+Sempre que o estado do Circuit Breaker for alterado, é altamente recomendado registrar logs, emitir métricas e gerar alertas.
+
+Dessa forma, será possível identificar rapidamente quando uma dependência começou a apresentar instabilidade e acompanhar sua recuperação ao longo do tempo.
+
+## Circuit Breaker + Retry
+
+Um ponto importante é que o Circuit Breaker não substitui o Retry. Na prática, eles são utilizados em conjunto. O Retry continua sendo responsável por recuperar falhas transitórias. O Exponential Backoff reduz a frequência das tentativas. O Jitter distribui essas tentativas ao longo do tempo. Já o Circuit Breaker define quando devemos parar de tentar temporariamente. Essa combinação é extremamente comum em arquiteturas distribuídas modernas, pois permite tratar diferentes tipos de falhas utilizando a estratégia mais adequada para cada situação.
+
+## Conclusão
+
+Quando percebemos que uma dependência continua falhando mesmo após diversas tentativas, insistir deixa de ser uma estratégia inteligente. Nesse momento, a melhor decisão é parar temporariamente as chamadas, permitir que a dependência se recupere e somente depois voltar a processar novas requisições.
+
+Essa é justamente a responsabilidade do Circuit Breaker e um dos motivos pelos quais ele se tornou um dos padrões de resiliência mais utilizados em arquiteturas distribuídas.
+
+## Referências
+
+- https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/circuit-breaker.html
+- https://dev.to/serifcolakel/circuit-breaker-patterns-in-go-microservices-n3
+- https://www.geeksforgeeks.org/system-design/what-is-circuit-breaker-pattern-in-microservices/
+- https://sre.google/sre-book/addressing-cascading-failures/
+- https://fidelissauro.dev/resiliencia/
+- https://martinfowler.com/bliki/CircuitBreaker.html
