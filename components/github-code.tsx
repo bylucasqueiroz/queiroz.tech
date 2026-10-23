@@ -2,8 +2,23 @@
 
 import { useTheme } from 'next-themes';
 import React, { useState, useEffect } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+// Light build: only the grammars registered below ship with the page (the full build is ~600 KB).
+// A language that isn't registered still renders, just without highlighting; add it here first.
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
+import csharp from 'react-syntax-highlighter/dist/esm/languages/prism/csharp';
+import docker from 'react-syntax-highlighter/dist/esm/languages/prism/docker';
+import go from 'react-syntax-highlighter/dist/esm/languages/prism/go';
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
+import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml';
 import { materialDark, materialLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+const languages = { bash, csharp, docker, go, javascript, json, python, sql, typescript, yaml };
+for (const [name, grammar] of Object.entries(languages)) SyntaxHighlighter.registerLanguage(name, grammar);
 
 const ALLOWED_HOST = 'raw.githubusercontent.com';
 

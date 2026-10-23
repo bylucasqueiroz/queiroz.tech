@@ -1,9 +1,11 @@
 import * as runtime from "react/jsx-runtime"
 import React from "react"
 import type { MDXComponents } from "mdx/types"
-import GitHubCode from "./github-code"
+import Image from "next/image"
+import GitHubCode from "./github-code-lazy"
 import MermaidDiagram from "./mermaid-diagram"
 import type { Lang } from "@/lib/i18n"
+import { getImageSize } from "@/lib/image-size"
 
 function Div({ "data-mermaid": chart, ...props }: React.HTMLAttributes<HTMLDivElement> & { "data-mermaid"?: string }) {
   if (chart) return <MermaidDiagram chart={chart} />
@@ -16,12 +18,31 @@ interface FigureProps {
   caption?: string
 }
 
-/** Image with an optional caption. Also used for the `<Image>` tag older posts were written with. */
-function Figure({ src, alt = "", caption }: FigureProps) {
+const figureImageClass = "my-0 w-full rounded-xl border border-line"
+
+/**
+ * Image with an optional caption. Also used for the `<Image>` tag older posts were written with.
+ * Local PNG/JPEG files go through next/image (resized, modern formats) at the same rendered size;
+ * anything whose dimensions can't be read stays a plain <img>.
+ */
+async function Figure({ src, alt = "", caption }: FigureProps) {
+  const size = await getImageSize(src)
   return (
     <figure className="my-8">
-      {/* eslint-disable-next-line @next/next/no-img-element -- post images have no known dimensions */}
-      <img src={src} alt={alt} loading="lazy" className="my-0 w-full rounded-xl border border-line" />
+      {size ? (
+        <Image
+          src={src}
+          alt={alt}
+          width={size.width}
+          height={size.height}
+          quality={90}
+          sizes="(min-width: 1024px) 720px, 100vw"
+          className={`${figureImageClass} h-auto`}
+        />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element -- dimensions unknown (remote or unsupported format)
+        <img src={src} alt={alt} loading="lazy" className={figureImageClass} />
+      )}
       {caption && <figcaption className="mt-3 text-sm leading-normal text-muted">{caption}</figcaption>}
     </figure>
   )
@@ -63,7 +84,8 @@ function getComponents(lang: Lang) {
     Callout: (props: CalloutProps) => <Callout {...props} lang={lang} />,
     GitHubCode,
     div: Div,
-  } as MDXComponents
+    // Figure is an async server component; MDX's types predate those, React renders it fine.
+  } as unknown as MDXComponents
 }
 
 interface MdxProps {
