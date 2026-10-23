@@ -57,6 +57,7 @@ const posts = defineCollection({
       motif: s.enum(MOTIFS),
       series: s.string().optional(),
       seriesOrder: s.number().optional(),
+      draft: s.boolean().default(false),
       toc: s.toc({ maxDepth: 2 }),
       metadata: s.metadata(),
       content: s.mdx(),

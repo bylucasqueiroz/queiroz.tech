@@ -9,6 +9,7 @@ export const MOTIFS = [
   "scale",
   "chart",
   "pipeline",
+  "throttle",
 ] as const
 
 export type Motif = (typeof MOTIFS)[number]

@@ -14,7 +14,7 @@ export const COVER_WIDTH = 1200
 export const COVER_HEIGHT = 630
 export const CARD_SHIFT = -240
 
-export const coverPalette: Record<string, { background: string; accent: string }> = {
+const coverPalette: Record<string, { background: string; accent: string }> = {
   "system-design": { background: "#3730A3", accent: "#C7D2FE" },
   go: { background: "#115E59", accent: "#5EEAD4" },
   dotnet: { background: "#86198F", accent: "#F5D0FE" },
@@ -126,6 +126,23 @@ const shapes: Record<Motif, (r: ShapeRefs) => string> = {
       <path d="M672 315H696" marker-end="url(#${arrow})"/><path d="M812 315H836" marker-end="url(#${arrow})"/><path d="M952 315H976" marker-end="url(#${arrow})"/>
     </g>
     <rect x="980" y="283" width="110" height="64" fill="rgba(255,255,255,0.12)" stroke="${accent}" stroke-width="3"/>`,
+
+  throttle: ({ accent, arrow, arrowAccent }) => `
+    <g stroke="${W}" stroke-width="2.5" fill="none">
+      <path d="M560 250H742" marker-end="url(#${arrow})"/>
+      <path d="M560 285H742" stroke-opacity="0.8" marker-end="url(#${arrow})"/>
+      <path d="M560 320H742" stroke-opacity="0.65" marker-end="url(#${arrow})"/>
+      <path d="M560 355H742" stroke-opacity="0.5" marker-end="url(#${arrow})"/>
+      <path d="M560 390H742" stroke-opacity="0.35" marker-end="url(#${arrow})"/>
+      <path d="M892 290H998" marker-end="url(#${arrow})"/>
+      <path d="M892 340H998" marker-end="url(#${arrow})"/>
+      <rect x="1004" y="255" width="136" height="120"/>
+    </g>
+    <path d="M820 110V200" fill="none" stroke="${accent}" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#${arrowAccent})"/>
+    <circle cx="820" cy="140" r="9" fill="${accent}"/>
+    <path d="M750 210V400H890V210" fill="rgba(255,255,255,0.08)" stroke="${accent}" stroke-width="3"/>
+    <g fill="${accent}"><circle cx="785" cy="380" r="11"/><circle cx="820" cy="380" r="11"/><circle cx="855" cy="380" r="11"/></g>
+    <path d="M892 384C940 400 960 460 1000 468" fill="none" stroke="${accent}" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#${arrowAccent})"/>`,
 }
 
 export const motifLabels: Record<Motif, CoverLabel[]> = {
@@ -194,6 +211,13 @@ export const motifLabels: Record<Motif, CoverLabel[]> = {
     { x: 895, y: 321, text: "image", size: 16 },
     { x: 1035, y: 321, text: "deploy", size: 16, accent: true },
     { x: 1035, y: 384, text: "→ prod", size: 14, accent: true },
+  ],
+  throttle: [
+    { x: 650, y: 226, text: { pt: "requisições", en: "requests" }, size: 15, opacity: 0.8 },
+    { x: 838, y: 146, text: "+r tokens/s", size: 14, anchor: "start", accent: true },
+    { x: 820, y: 436, text: "token bucket", size: 15, opacity: 0.8 },
+    { x: 1072, y: 321, text: "service", size: 17 },
+    { x: 1012, y: 474, text: "429", size: 17, anchor: "start", accent: true },
   ],
 }
 
