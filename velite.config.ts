@@ -78,21 +78,6 @@ const posts = defineCollection({
     }),
 })
 
-const pages = defineCollection({
-  name: "Page",
-  pattern: "pages/**/*.mdx",
-  schema: s
-    .object({
-      title: s.string(),
-      description: s.string().optional(),
-      content: s.mdx(),
-    })
-    .transform((data, { meta }) => {
-      const match = meta.path.match(/content\/pages\/(.+)\.mdx$/)
-      return { ...data, slug: match ? match[1] : "" }
-    }),
-})
-
 export default defineConfig({
   root: "content",
   output: {
@@ -102,7 +87,7 @@ export default defineConfig({
     name: "[name]-[hash:8][extname]",
     clean: true,
   },
-  collections: { posts, pages },
+  collections: { posts },
   mdx: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [

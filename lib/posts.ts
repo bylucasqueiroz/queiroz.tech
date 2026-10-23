@@ -1,4 +1,4 @@
-import { posts, pages } from "@/.velite"
+import { posts } from "@/.velite"
 import { dateLocale, type Lang } from "@/lib/i18n"
 
 export type Post = (typeof posts)[number]
@@ -93,10 +93,6 @@ export function getCategoryCounts(lang: Lang) {
       count: all.filter((post) => post.category === category).length,
     }))
     .filter((entry) => entry.count > 0)
-}
-
-export function getPage(slug: string) {
-  return pages.find((page) => page.slug === slug)
 }
 
 export function formatDate(date: string, lang: Lang, style: "short" | "long" = "short") {

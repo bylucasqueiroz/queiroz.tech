@@ -68,11 +68,15 @@ const pt = {
   about: {
     title: "Sobre",
     paragraphs: [
-      "Olá! Sou Lucas Queiroz, engenheiro de software trabalhando com sistemas distribuídos em um dos maiores bancos da América Latina.",
-      "Escrevo sobre sistemas distribuídos, engenharia de confiabilidade e a realidade operacional de trabalhar em escala. Também escrevo sobre Go, .NET e engenharia de software de um modo geral. Parte do que está aqui vem de problemas do dia a dia; parte é só eu tentando pensar algo em voz alta.",
-      "Se quiser entrar em contato, pode me encontrar no LinkedIn.",
+      "Olá! Sou Lucas Queiroz, engenheiro de software backend há mais de 8 anos. Trabalho com sistemas distribuídos e infraestrutura financeira em um dos maiores bancos da América Latina, onde ajudei a escalar sistemas que processam mais de 28 milhões de transações por dia.",
+      "No dia a dia uso Go, .NET, Kubernetes e AWS para construir serviços cloud-native, arquiteturas orientadas a eventos e integrações seguras com o sistema financeiro nacional, incluindo o Banco Central. Já liderei a modernização de sistemas legados para arquiteturas distribuídas e mentorei engenheiros com foco em confiabilidade e design limpo.",
+      "Aqui escrevo sobre o que aprendo nesse caminho: sistemas distribuídos, confiabilidade, Go e .NET. Parte vem de problemas reais do dia a dia; parte sou eu pensando em voz alta.",
+      "Se quiser conversar, me encontre no LinkedIn.",
     ],
     experience: "Experiência",
+    education: "Formação",
+    certifications: "Certificações",
+    awards: "Reconhecimentos",
   },
   follow: {
     title: "Acompanhe os próximos artigos",
@@ -143,11 +147,15 @@ const en: Dictionary = {
   about: {
     title: "About",
     paragraphs: [
-      "Hi! I'm Lucas Queiroz, a software engineer working on distributed systems at one of the largest banks in Latin America.",
-      "I write about distributed systems, reliability engineering, and the operational reality of building things at scale. I also cover Go, .NET, and software engineering more broadly. Some of what's here comes from everyday problems; some is just me working through ideas in writing.",
-      "If you'd like to get in touch, you can find me on LinkedIn.",
+      "Hi! I'm Lucas Queiroz, a backend software engineer with more than 8 years of experience. I work on distributed systems and financial infrastructure at one of the largest banks in Latin America, where I've helped scale systems that process over 28 million transactions a day.",
+      "Day to day I use Go, .NET, Kubernetes and AWS to build cloud-native services, event-driven architectures and secure integrations with Brazil's financial system, including the Central Bank. I've led the modernisation of legacy systems into distributed architectures and mentored engineers with a focus on reliability and clean design.",
+      "Here I write about what I learn along the way: distributed systems, reliability, Go and .NET. Some of it comes from real day-to-day problems; some is me thinking out loud.",
+      "If you'd like to talk, find me on LinkedIn.",
     ],
     experience: "Experience",
+    education: "Education",
+    certifications: "Certifications",
+    awards: "Recognition",
   },
   follow: {
     title: "Follow upcoming posts",
