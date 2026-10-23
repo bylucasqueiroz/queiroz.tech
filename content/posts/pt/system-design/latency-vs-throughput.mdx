@@ -1,0 +1,47 @@
+---
+title: "Latência vs Throughput"
+description: "Entendendo essas métricas de system design"
+date: "2025-12-01"
+tags: ["system design"]
+motif: "chart"
+---
+
+Temos dois termos diferentes que costumam aparecer quando falamos sobre o comportamento dos nossos sistemas. Esses termos são Latência e Throughput — muito comuns em conversas sobre system design.
+
+Vamos entender a diferença entre eles.
+
+## Latência
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/latency-vs-throughput/latency.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Latência é o tempo necessário para realizar uma ação ou retornar um resultado. É muito comum falar sobre latência ao discutir uma API — geralmente pensamos em quanto tempo é necessário desde o início da requisição até a conclusão da resposta. Isso é latência. Classificamos essa métrica com unidades de tempo, como milissegundos, microssegundos, segundos, etc.
+
+Se um serviço tem baixa latência, significa que o resultado foi obtido mais rapidamente após uma chamada. Por outro lado, se temos alta latência, não temos um sistema que responde com agilidade.
+
+Muitas coisas podem gerar alta latência, como problemas de infraestrutura e rede, problemas no nível da aplicação, problemas de banco de dados e outros.
+
+Por exemplo, podemos ter congestionamento de rede devido ao volume de tráfego passando pelo mesmo link. Ou, pensando no nível da aplicação, podemos ter uma aplicação onde cada operação tenta ler múltiplas vezes o mesmo valor que nunca muda no banco de dados.
+
+## Throughput
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/latency-vs-throughput/throughput.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Falando sobre throughput, queremos saber quantas transações o sistema consegue processar por unidade de tempo. Diferente da latência, com essa métrica nos interessa a quantidade. É comum ouvir quantas Transações Por Segundo (TPS), ou Requisições Por Segundo (RPS) nosso serviço consegue processar.
+
+Um serviço com baixo throughput é um serviço que não consegue lidar com um grande número de transações por tempo — e esse comportamento em arquiteturas que precisam de alta performance pode ser um problema. Um serviço de alto throughput, por sua vez, significa que ele consegue lidar com um grande número de transações por unidade de tempo.
+
+Também temos problemas que reduzem o throughput nos sistemas. Alguns deles são gargalos de infraestrutura e hardware, como saturação de CPU, memória insuficiente, largura de banda de rede limitada e outros. Também podemos ter problemas no nível da aplicação, como implementação ineficiente de concorrência, ou operações custosas dentro das requisições — como o parsing de JSONs muito grandes, por exemplo.
+
+## Conclusão
+
+Latência é o tempo para uma requisição. Throughput é quantas requisições por segundo o sistema consegue processar. Aumentar o throughput geralmente exige batching e concorrência — o que adiciona tempo de espera e aumenta a latência. Por isso, normalmente você escolhe com base na natureza do seu workload. Por exemplo, se você precisa de um sistema em tempo real, precisa otimizar a latência. Mas se você precisa de alto volume de processamento, precisa otimizar o throughput.

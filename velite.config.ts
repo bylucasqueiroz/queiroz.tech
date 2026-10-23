@@ -1,8 +1,10 @@
 import { defineConfig, defineCollection, s } from "velite"
 import rehypePrettyCode from "rehype-pretty-code"
 import rehypeKatex from "rehype-katex"
+import rehypeSlug from "rehype-slug"
 import remarkMath from "remark-math"
 import type { Root, Element } from "hast"
+import { MOTIFS } from "./lib/motifs"
 
 // Runs BEFORE rehype-pretty-code: converts <pre><code class="language-mermaid">
 // into <div data-mermaid="..."> so rehype-pretty-code never touches it.
@@ -48,24 +50,30 @@ const posts = defineCollection({
   pattern: "posts/**/*.mdx",
   schema: s
     .object({
-      title: s.string(),
-      description: s.string().optional(),
+      title: s.string().max(120),
+      description: s.string(),
       date: s.isodate(),
-      tag: s.string().optional(),
-      language: s.string().optional(),
-      image: s.string().optional(),
-      translation: s.string().optional(),
+      tags: s.array(s.string()).default([]),
+      motif: s.enum(MOTIFS),
+      series: s.string().optional(),
+      seriesOrder: s.number().optional(),
+      toc: s.toc({ maxDepth: 2 }),
+      metadata: s.metadata(),
       content: s.mdx(),
     })
     .transform((data, { meta }) => {
-      // meta.path is absolute — extract relative path from content/posts/
-      const match = meta.path.match(/content\/posts\/(.+)\.mdx$/)
-      const slugAsParams = match ? match[1] : ""
-      // e.g. "go/unbuffered-vs-buffered"
+      // e.g. content/posts/pt/system-design/latency-vs-throughput.mdx
+      const match = meta.path.match(/content\/posts\/(pt|en)\/([^/]+)\/([^/]+)\.mdx$/)
+      if (!match) {
+        throw new Error(`Post must live at content/posts/{pt|en}/{category}/{slug}.mdx: ${meta.path}`)
+      }
+      const [, lang, category, slug] = match as unknown as [string, "pt" | "en", string, string]
       return {
         ...data,
-        slug: `/posts/${slugAsParams}`,
-        slugAsParams,
+        lang,
+        category,
+        slug,
+        url: `/${lang}/blog/${category}/${slug}`,
       }
     }),
 })
@@ -77,20 +85,11 @@ const pages = defineCollection({
     .object({
       title: s.string(),
       description: s.string().optional(),
-      tag: s.string().optional(),
-      language: s.string().optional(),
       content: s.mdx(),
     })
     .transform((data, { meta }) => {
-      // meta.path is absolute — extract relative path from content/pages/
       const match = meta.path.match(/content\/pages\/(.+)\.mdx$/)
-      const slugAsParams = match ? match[1] : ""
-      // e.g. "about"
-      return {
-        ...data,
-        slug: `/${slugAsParams}`,
-        slugAsParams,
-      }
+      return { ...data, slug: match ? match[1] : "" }
     }),
 })
 
@@ -107,15 +106,17 @@ export default defineConfig({
   mdx: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [
+      rehypeSlug,
       rehypeProtectMermaid,
       rehypeKatex,
       [
         rehypePrettyCode,
         {
-          themes: {
+          theme: {
             dark: "github-dark",
             light: "github-light",
           },
+          keepBackground: false,
         },
       ],
     ],

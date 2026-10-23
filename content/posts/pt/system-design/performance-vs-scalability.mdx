@@ -1,0 +1,57 @@
+---
+title: "Escalabilidade e Performance"
+description: "Entendendo a diferença entre escalabilidade e performance."
+date: "2025-11-26"
+tags: ["system design"]
+motif: "scale"
+---
+
+Comecei a revisar alguns conceitos sobre system design, e existem algumas palavras que aparecem com frequência quando falamos sobre sistemas que precisam processar centenas de transações por dia. Essas palavras são performance e escalabilidade.
+
+Na minha cabeça, os conceitos estavam claros, mas comecei a perceber que, embora esses termos costumem andar juntos, isso não significa que eles têm o mesmo significado.
+
+Vamos detalhar cada um.
+
+## Performance
+
+Quando falamos de performance, estamos falando sobre o quão rápido um sistema funciona com uma quantidade fixa de recursos. Usando um carro como exemplo: quanto tempo um único carro precisa para levar um grupo de pessoas de um ponto a outro? Essa é a pergunta. E quando falamos de sistemas, a questão se torna: quanto tempo uma única instância do nosso serviço leva para lidar com uma determinada carga de trabalho?
+
+Ao analisar performance, existem alguns pontos importantes que podemos avaliar para entender como o sistema está se comportando sob carga, como latência por requisição, throughput por instância, tempo de resposta e até utilização de recursos.
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/performance-vs-scalability/performance.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Como você pode ver na imagem, temos uma fila de transações com apenas uma instância de serviço processando-a. Cada transação leva 1 segundo para ser processada, então temos 1 TPS. Mas você também pode ver que a fila tem 10 mensagens aguardando para serem processadas sequencialmente. Portanto, essa instância é capaz de processar 10 transações a cada 10 segundos — o que nos dá uma ideia clara do seu throughput máximo.
+
+Esse exemplo é especificamente sobre o throughput de uma única instância. Não se trata do sistema como um todo, apenas dessa instância e de como ela performa ao processar mensagens uma a uma.
+
+Com isso em mente, podemos avaliar nosso cenário e decidir se precisamos otimizar o serviço, remover gargalos, ou até repensar parte da arquitetura se a performance não for suficiente para o projeto.
+
+Basicamente, podemos entender quantas transações uma instância consegue processar em um dia e usar esse dado para tomar decisões melhores.
+
+## Escalabilidade
+
+Quando falamos de escalabilidade, estamos falando sobre a capacidade do sistema de lidar com uma quantidade crescente de trabalho adicionando mais recursos. Em outras palavras, o sistema se adapta à carga de trabalho — e não o contrário. Usando o mesmo exemplo do carro: se você adicionar mais carros para transportar a mesma quantidade de pessoas, o tempo total diminui. Isso é escalonamento horizontal.
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/performance-vs-scalability/scalability.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Agora o cenário muda. Se nossa instância de serviço é capaz de lidar com 1 mensagem por segundo, e temos 5 instâncias trabalhando para processar as 10 transações, o tempo total cai para 2 segundos — porque cada instância processa uma mensagem de forma independente.
+
+Este é um exemplo simplificado de escalonamento linear. Em sistemas reais, o escalonamento nem sempre é perfeitamente linear devido a overhead, coordenação, rede, etc. Mas a ideia ainda funciona para explicar o conceito.
+
+É importante dizer também que cada instância ainda leva 1 segundo para processar uma mensagem — a latência por transação não diminui magicamente. O que melhora é o tempo total para processar toda a carga de trabalho, porque distribuímos o trabalho entre as instâncias.
+
+## Conclusão
+
+Em resumo, falar de performance é falar sobre o quão rápido uma única transação pode ser processada. Falar de escalabilidade é falar sobre a capacidade do sistema de lidar com um grande volume de transações, distribuindo a carga entre múltiplas instâncias.
+
+Não estou entrando em estratégias de escalonamento aqui (como autoscaling, escalonamento horizontal, escalonamento vertical, etc.). Meu objetivo é apenas deixar clara a diferença entre performance e escalabilidade.

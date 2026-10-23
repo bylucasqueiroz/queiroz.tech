@@ -2,32 +2,26 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useLang } from "./language-provider"
-import { t } from "@/lib/i18n"
 
-export default function NavLinks() {
+interface NavLinksProps {
+  label: string
+  links: { href: string; label: string }[]
+}
+
+export default function NavLinks({ label, links }: NavLinksProps) {
   const pathname = usePathname()
-  const { lang } = useLang()
-
-  const links = [
-    { href: "/", label: t[lang].nav.home },
-    { href: "/about", label: t[lang].nav.about },
-  ]
 
   return (
-    <nav className="flex items-center gap-1">
+    <nav aria-label={label} className="flex flex-wrap gap-1">
       {links.map(({ href, label }) => {
-        const active =
-          href === "/" ? pathname === "/" : pathname.startsWith(href)
-
+        const active = pathname === href || pathname.startsWith(`${href}/`)
         return (
           <Link
             key={href}
             href={href}
-            className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors no-underline ${
-              active
-                ? "text-accent bg-subtle"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 hover:bg-gray-100 dark:hover:bg-gray-800/60"
+            aria-current={active ? "page" : undefined}
+            className={`px-3 py-3 text-sm transition-colors ${
+              active ? "font-semibold text-fg" : "font-medium text-muted hover:text-fg"
             }`}
           >
             {label}

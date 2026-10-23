@@ -1,0 +1,192 @@
+---
+title: "Exponential Backoff na prática"
+description: "Neste artigo vamos entender como o Exponential Backoff funciona na prática, e como ele pode ser utilizado para reduzir a pressão sobre serviços degradados."
+date: "2026-08-01"
+tags: ["system design"]
+motif: "backoff"
+series: "resilience"
+seriesOrder: 2
+---
+
+<Image
+  alt={`post`}
+  src={`/images/resiliency-exponencial-backoff-in-practice/post.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+No artigo anterior vimos como o [Retry](/pt/blog/system-design/resiliency-why-retries-can-bring-down-your-system) permite aumentar a resiliência das aplicações realizando novas tentativas diante de falhas transitórias. Entretanto, também entendemos que uma implementação ingênua pode produzir exatamente o efeito contrário, aumentando a pressão sobre serviços já degradados e causando um Retry Storm.
+
+Neste artigo veremos como o Exponential Backoff funciona, por que ele reduz a sobrecarga em sistemas distribuídos e quais limitações ainda permanecem.
+
+## Relembrando o problema
+
+No artigo anterior utilizamos como exemplo um ambiente executando aproximadamente 500 instâncias da aplicação. Em determinado momento, uma API externa começa a responder HTTP 503 (Service Unavailable). Todas as instâncias detectam a falha e imediatamente fazem uma nova tentativa de comunicação. Em poucos milissegundos, o serviço que já estava indisponível recebe outras 500 requisições. Como continua indisponível, novas tentativas são realizadas, elevando rapidamente o volume de requisições para milhares por segundo. Em vez de ajudar na recuperação do serviço, os clientes passam a amplificar sua indisponibilidade.
+
+O problema não está em tentar novamente. O problema está em tentar novamente imediatamente, sem dar tempo suficiente para que a dependência consiga se recuperar. A própria documentação do Google Cloud classifica retries imediatos e sem estratégia de espera como um anti-pattern, justamente pelo potencial de amplificar indisponibilidades.
+
+<Image
+  alt={`replicas`}
+  src={`/images/resiliency-exponencial-backoff-in-practice/replicas.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Supondo que nosso servidor se veja sem recurso suficiente para lidar com as requisições, por falta de memória ou CPU, gerado por um aumento abrupto de volume de requisições, e passa a retornar respostas indicando limitação de capacidade, como HTTP 429 (Too Many Requests) ou HTTP 503 (Service Unavailable). Esse comportamento de retentativas consecutivas aumenta ainda mais a pressão sobre a dependência, podendo degradar processos internos e prolongar ainda mais sua recuperação.
+
+## O que é Exponential Backoff?
+
+O Exponential Backoff é uma estratégia de Retry onde o intervalo entre as tentativas aumenta progressivamente após cada falha. Com isso, a pressão exercida sobre serviços degradados é reduzida, diminuindo as chances de um Retry Storm.
+
+Diferentemente de estratégias com intervalo fixo ou incremento linear, o Exponential Backoff aumenta exponencialmente o intervalo entre as tentativas.
+
+No gráfico você consegue ter uma ideia de como funciona:
+
+<Image
+  alt={`graph`}
+  src={`/images/resiliency-exponencial-backoff-in-practice/graph.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Perceba que o intervalo entre as tentativas deixa de ser constante. A cada nova falha, o tempo de espera aumenta exponencialmente, reduzindo gradualmente a frequência das novas tentativas. Quanto maior a sequência de falhas, maior será o intervalo até a próxima tentativa. Dessa forma, a dependência ganha mais tempo para recuperar sua capacidade antes de receber novas requisições.
+
+Na maioria das implementações é recomendado definir um limite máximo para o crescimento do Backoff ( Max Backoff ). Caso contrário, uma dependência que já tenha se recuperado poderá permanecer sem receber novas tentativas por um intervalo excessivamente longo. O Max Backoff define um limite superior para o intervalo entre tentativas, evitando tempos de espera excessivamente longos quando a dependência já voltou a responder normalmente.
+
+Essa fórmula representa apenas uma implementação possível. Algumas bibliotecas utilizam pequenas variações no cálculo, mas todas seguem o mesmo princípio: aumentar progressivamente o intervalo entre as tentativas.
+
+$$
+\text{backoff} = \text{baseDelay} \times 2^{\text{tentativa}}
+$$
+
+Embora a base 2 seja a implementação mais comum, diferentes algoritmos podem utilizar funções de crescimento distintas, desde que mantenham a característica de aumento exponencial.
+
+Com isso, quanto maior o tempo de indisponibilidade da dependência, menor deve ser a frequência das novas tentativas. Desse modo, reduzimos a carga sobre um serviço degradado enquanto aumentamos as suas chances de se recuperar.
+## Comparando estratégias de Retry
+
+Existem diferentes estratégias para definir o intervalo entre as tentativas de Retry. A principal diferença entre elas está justamente na forma como o tempo de espera evolui a cada nova falha. Enquanto o Retry Fixo mantém sempre o mesmo intervalo, o Retry Incremental aumenta esse intervalo de forma linear. Já o Exponential Backoff aumenta o tempo de espera exponencialmente, reduzindo progressivamente a pressão sobre serviços degradados.
+
+As imagens abaixo ilustram como cada estratégia distribui as tentativas ao longo do tempo.
+
+### Intervalo Fixo
+
+<Image
+  alt={`fixed-retry`}
+  src={`/images/resiliency-exponencial-backoff-in-practice/fixed-retry.png`}
+  layout="fill"
+  className="!relative"
+  />
+
+### Intervalo Incremental
+
+<Image
+  alt={`incremental-retry`}
+  src={`/images/resiliency-exponencial-backoff-in-practice/incremental-retry.png`}
+  layout="fill"
+  className="!relative"
+  />
+
+### Exponencial Backoff
+
+<Image
+  alt={`exponential-backoff`}
+  src={`/images/resiliency-exponencial-backoff-in-practice/exponential-backoff.png`}
+  layout="fill"
+  className="!relative"
+  />
+
+Conseguimos ver lado a lado como cada espera acontece.
+
+| Tentativa | Retry Fixo | Retry Incremental | Exponential Backoff |
+| --------- | ---------- | ----------------- | ------------------- |
+| 1         | 100ms      | 100ms             | 100ms               |
+| 2         | 100ms      | 200ms             | 200ms               |
+| 3         | 100ms      | 300ms             | 400ms               |
+| 4         | 100ms      | 400ms             | 800ms               |
+| 5         | 100ms      | 500ms             | 1600ms              |
+
+Perceba que o Exponential Backoff não reduz a quantidade de tentativas realizadas. Ele apenas distribui essas tentativas ao longo do tempo. Essa simples mudança reduz significativamente a pressão exercida sobre serviços degradados.
+
+## Implementação
+
+A implementação do Exponential Backoff é extremamente simples. Na prática, a única diferença em relação a um Retry tradicional está na forma como o tempo de espera entre as tentativas é calculado.
+
+Em uma estratégia de  Retry com intervalo fixo, todas as tentativas aguardam exatamente o mesmo período antes de serem executadas novamente.
+
+```go
+delay := baseDelay
+```
+
+Em uma estratégia de  Retry com intervalo incremental,  o tempo de espera cresce linearmente.
+
+```go
+delay := baseDelay * time.Duration(retryCount)
+```
+
+Já utilizando  Exponential Backoff, o tempo de espera cresce exponencialmente a cada nova falha, respeitando um limite máximo definido pelo  Max Backoff .
+
+```go
+backoff := baseDelay * time.Duration(1<<retryCount)
+
+if backoff > maxBackoff {
+	backoff = maxBackoff
+}
+
+delay := backoff
+```
+
+Perceba que poucas linhas de código são suficientes para alterar completamente o comportamento da aplicação. Em vez de executar novas tentativas em intervalos constantes, o sistema passa a reduzir gradualmente a frequência das requisições, diminuindo a pressão sobre dependências degradadas e aumentando suas chances de recuperação.
+
+## Limitações do Exponential Backoff
+
+Apesar dos benefícios, o Exponential Backoff não resolve todos os problemas relacionados ao Retry. Embora reduza significativamente a pressão sobre o serviço, o Exponential Backoff ainda possui uma limitação importante: clientes diferentes continuam calculando exatamente os mesmos intervalos entre tentativas. Como consequência, milhares de aplicações podem voltar a realizar novas requisições praticamente no mesmo instante, criando novos picos de tráfego.
+
+## Exponential Backoff + Jitter
+
+Embora o Exponential Backoff aumente o intervalo entre as tentativas, diferentes clientes continuam utilizando exatamente o mesmo cálculo. Isso faz com que milhares de aplicações realizem novas tentativas praticamente no mesmo instante.
+
+O Jitter acrescenta um efeito de aleatoriedade sobre o valor gerado pelo cálculo do exponential backoff, fazendo com que os valores de tempo produzidos não estejam dentro do mesmo milisegundo. Ao introduzir um pequeno componente aleatório sobre o tempo calculado, as tentativas deixam de acontecer simultaneamente, distribuindo naturalmente a carga ao longo do tempo.
+
+A imagem abaixo ilustra como as tentativas passam a ser distribuídas ao longo do tempo após a aplicação do Full Jitter.
+
+<Image
+  alt={`exponential-backoff-jitter`}
+  src={`/images/resiliency-exponencial-backoff-in-practice/exponential-backoff-jitter.png`}
+  layout="fill"
+  className="!relative"
+  />
+
+### Implementação do Full Jitter
+
+Assim como o Exponential Backoff exige apenas algumas linhas de código, adicionar o  Full Jitter  também é bastante simples. A diferença é que, em vez de utilizar exatamente o valor calculado pelo Backoff, sorteamos um tempo aleatório entre 0 (zero) e o valor máximo calculado.
+
+``` go
+backoff := baseDelay * time.Duration(1<<retryCount)
+
+if backoff > maxBackoff {
+	backoff = maxBackoff
+}
+
+delay := time.Duration(rand.Int63n(int64(backoff)))
+```
+
+Dessa forma, diferentes clientes passam a executar novas tentativas em instantes distintos, distribuindo naturalmente a carga sobre a dependência.
+
+## Os diferentes tipos de Jitter
+
+Existem diferentes estratégias para adicionar aleatoriedade ao cálculo do Backoff. As mais conhecidas são:
+
+-  Full Jitter:  sorteia um valor aleatório entre 0 (zero) e o Backoff calculado. É a estratégia mais utilizada por reduzir significativamente a sincronização entre clientes.
+-  Equal Jitter:  mantém parte do tempo de espera calculado e aplica aleatoriedade apenas sobre a outra metade, evitando tempos muito pequenos.
+-  Decorrelated Jitter: utiliza o atraso anterior para calcular o próximo intervalo, produzindo tempos mais imprevisíveis e evitando sincronização entre clientes durante longos períodos.
+
+Neste artigo utilizamos o  Full Jitter, por ser a abordagem mais simples e também a recomendada em diversas documentações, como as da [AWS](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/).
+
+## Conclusão
+
+O Retry continua sendo um dos mecanismos mais importantes para lidar com falhas transitórias. Entretanto, como vimos neste artigo, a estratégia utilizada para definir o intervalo entre as tentativas faz toda a diferença. O Exponential Backoff reduz significativamente a pressão sobre sistemas degradados e hoje é amplamente utilizado em arquiteturas distribuídas modernas. Ainda assim, quando milhares de clientes executam o mesmo algoritmo simultaneamente, novos picos de tráfego podem surgir. É justamente esse cenário que motiva a utilização do Jitter.
+
+## Referências
+
+- https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/retry-backoff.html
+- https://docs.cloud.google.com/storage/docs/retry-strategy

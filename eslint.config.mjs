@@ -10,8 +10,7 @@ export default defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    ".contentlayer/**",
-    "contentlayer/generated/**",
+    ".velite/**",
   ]),
 ]);
 

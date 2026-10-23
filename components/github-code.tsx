@@ -22,11 +22,11 @@ function isSafeUrl(url: string): boolean {
 }
 
 export default function GitHubCode({ url, language }: GitHubCodeProps) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const codeTheme = theme === 'dark' ? materialDark : materialLight;
+  const codeTheme = resolvedTheme === 'dark' ? materialDark : materialLight;
 
   useEffect(() => {
     if (!isSafeUrl(url)) {
@@ -51,10 +51,14 @@ export default function GitHubCode({ url, language }: GitHubCodeProps) {
     fetchCode();
   }, [url]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div className="my-6 h-24 animate-pulse rounded-xl border border-line bg-surface" />;
 
   return (
-    <SyntaxHighlighter language={language} style={codeTheme}>
+    <SyntaxHighlighter
+      language={language}
+      style={codeTheme}
+      customStyle={{ borderRadius: "0.75rem", fontSize: "0.875rem", border: "1px solid var(--line)" }}
+    >
       {code}
     </SyntaxHighlighter>
   );

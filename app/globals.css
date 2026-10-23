@@ -3,87 +3,150 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ─── Color tokens ─────────────────────────────────────────────── */
+/* ─── Design tokens ────────────────────────────────────────────── */
 @theme inline {
-  --color-accent:        var(--accent);
-  --color-accent-hover:  var(--accent-hover);
-  --color-subtle:        var(--subtle);
-  --color-subtle-border: var(--subtle-border);
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-cat-sd: var(--cat-sd);
+  --color-cat-go: var(--cat-go);
+  --color-cat-dotnet: var(--cat-dotnet);
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
-/* Light mode */
 :root {
-  color-scheme: light dark;
-
-  --accent:        #1a65cc;   /* darker blue — passes WCAG AA on white */
-  --accent-hover:  #1553aa;
-  --subtle:        #eff6ff;   /* blue-50 tint for tag chips */
-  --subtle-border: #bfdbfe;   /* blue-200 */
+  color-scheme: light;
+  --bg: #ffffff;
+  --fg: #0f1419;
+  --muted: #59636e;
+  --line: #e4e7eb;
+  --surface: #f5f6f8;
+  --accent: #4338ca;
+  --cat-sd: #4338ca;
+  --cat-go: #0f766e;
+  --cat-dotnet: #a21caf;
+  --grid: rgb(67 56 202 / 0.06);
 }
 
-/* Dark mode */
 .dark {
-  --accent:        #4493F8;
-  --accent-hover:  #6aabff;
-  --subtle:        #121D2F;
-  --subtle-border: #1e3a5f;
+  color-scheme: dark;
+  --bg: #0d1015;
+  --fg: #e6e8eb;
+  --muted: #9ba4ae;
+  --line: #262b33;
+  --surface: #151920;
+  --accent: #a5b4fc;
+  --cat-sd: #a5b4fc;
+  --cat-go: #5eead4;
+  --cat-dotnet: #f0abfc;
+  --grid: rgb(165 180 252 / 0.06);
 }
 
-/* ─── Syntax highlighting (rehype-pretty-code + shiki) ─────────── */
+/* ─── Blueprint grid ──────────────────────────────────────────────
+   The cover diagrams' grid, reused behind the home page and at the top of index pages. */
+.bg-blueprint {
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center top;
+}
+
+.bg-blueprint-fade {
+  mask-image: linear-gradient(to bottom, #000 35%, transparent);
+}
+
+/* ─── Article typography ───────────────────────────────────────── */
+.prose-site {
+  --tw-prose-body: var(--fg);
+  --tw-prose-headings: var(--fg);
+  --tw-prose-lead: var(--muted);
+  --tw-prose-links: var(--accent);
+  --tw-prose-bold: var(--fg);
+  --tw-prose-counters: var(--muted);
+  --tw-prose-bullets: var(--muted);
+  --tw-prose-hr: var(--line);
+  --tw-prose-quotes: var(--fg);
+  --tw-prose-quote-borders: var(--line);
+  --tw-prose-captions: var(--muted);
+  --tw-prose-code: var(--fg);
+  --tw-prose-th-borders: var(--line);
+  --tw-prose-td-borders: var(--line);
+}
+
+.prose-site :where(h2, h3, h4) {
+  letter-spacing: -0.02em;
+  scroll-margin-top: 1.5rem;
+}
+
+.prose-site :where(h2) {
+  font-weight: 700;
+}
+
+.prose-site :where(a) {
+  text-underline-offset: 3px;
+}
+
+.prose-site :where(:not(pre) > code) {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.375rem;
+  padding: 0.1em 0.35em;
+  font-weight: 500;
+}
+
+.prose-site :where(:not(pre) > code)::before,
+.prose-site :where(:not(pre) > code)::after {
+  content: none;
+}
+
+/* ─── Code blocks (rehype-pretty-code + shiki) ─────────────────── */
 [data-rehype-pretty-code-figure] pre {
   overflow-x: auto;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
   padding: 1rem 1.25rem;
   font-size: 0.875rem;
   line-height: 1.7;
 }
 
-.dark [data-rehype-pretty-code-figure] pre {
-  border-color: #1f2937;
-}
-
 [data-rehype-pretty-code-figure] code {
   background: none;
   padding: 0;
-  border-radius: 0;
+  border: 0;
   font-size: inherit;
   color: inherit;
 }
 
-/* Apply theme CSS variables based on dark/light */
-[data-rehype-pretty-code-figure] [data-theme="light"] { display: block; }
-[data-rehype-pretty-code-figure] [data-theme="dark"]  { display: none; }
-
-.dark [data-rehype-pretty-code-figure] [data-theme="light"] { display: none; }
-.dark [data-rehype-pretty-code-figure] [data-theme="dark"]  { display: block; }
-
-/* Language label */
-[data-rehype-pretty-code-title] {
-  font-size: 0.75rem;
-  font-family: ui-monospace, monospace;
-  color: #6b7280;
-  padding: 0.4rem 1rem;
-  border: 1px solid #e5e7eb;
-  border-bottom: none;
-  border-radius: 0.5rem 0.5rem 0 0;
-  background: #f9fafb;
+[data-rehype-pretty-code-figure] pre {
+  background: var(--surface);
 }
 
-.dark [data-rehype-pretty-code-title] {
-  color: #9ca3af;
-  border-color: #1f2937;
-  background: #0d1117;
+[data-rehype-pretty-code-figure] code span {
+  color: var(--shiki-light);
+}
+
+.dark [data-rehype-pretty-code-figure] code span {
+  color: var(--shiki-dark);
+}
+
+[data-rehype-pretty-code-title] {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: var(--surface);
 }
 
 [data-rehype-pretty-code-title] + pre {
-  border-radius: 0 0 0.5rem 0.5rem;
-}
-
-/* ─── Base ─────────────────────────────────────────────────────── */
-.prose h2,
-h3,
-h4 {
-  font-weight: 500 !important;
-  letter-spacing: -0.025em !important;
+  border-radius: 0 0 0.75rem 0.75rem;
+  margin-top: 0;
 }

@@ -1,0 +1,196 @@
+---
+title: 'Implementando uma solução de cache local em Go'
+description: 'Como implementar uma solução de cache em Go que escala e pode ser reutilizada em múltiplas aplicações.'
+date: '2026-02-17'
+tags: ["go"]
+motif: "cache"
+---
+
+<Image
+  alt={`Option Menu`}
+  src={`/images/implementing-a-go-local-cache-solution/implementing-a-go-local-cache-solution.png`}
+  layout="fill"
+  className="!relative"
+/>
+
+Cache pode ser usado em múltiplos cenários, especialmente quando você quer ter uma camada entre seu serviço e um banco de dados ou um segundo serviço que sempre retorna a mesma informação por um período de tempo — como uma API ou algo semelhante. Em alguns casos, pode ser necessário usar um cache distribuído como o Redis, onde você terá um cluster para armazenar seus dados. Isso acontece especialmente quando você trabalha com múltiplos serviços rodando ao mesmo tempo, com muitas réplicas como pods ou tasks.
+
+Considerando que você tem a necessidade de controlar o cache localmente na aplicação antes de ir a um serviço externo, ou se você tem um serviço temporariamente indisponível e não consegue alcançá-lo, um cache local pode ser uma boa solução — permitindo que seu serviço continue funcionando sem informações externas por um período de tempo, até que o serviço primário fique disponível novamente.
+
+Pensando nisso, decidi compartilhar um exemplo em Go de implementação de cache local. Vamos analisar cada parte.
+
+## A estrutura principal
+
+Em primeiro lugar, vamos criar uma struct simples que será usada como template para armazenar dados em memória. É simples — temos apenas um valor cujo tipo é `interface{}`.
+
+``` go
+type localCacheItem struct {
+    value interface{}
+    expiresAt time.Time
+}
+```
+
+A segunda parte importante é que nosso cache precisa ser seguro quando temos múltiplas execuções concorrentes consumindo-o. Aqui, usaremos um RWMutex para garantir a exclusão mútua. [O lock pode ser mantido por múltiplos leitores ou por um único escritor](https://go.dev/src/sync/rwmutex.go). Isso garante que todas as goroutines acessem os dados com segurança. Você pode ler mais sobre Mutex [aqui](https://queiroz.tech/posts/go/how-to-ensure-thread-safeness-in-go).
+
+``` go
+type LocalCache struct {
+    mu sync.RWMutex
+    items map[string]*localCacheItem
+    ttl time.Duration
+}
+```
+
+Como você pode ver, para complementar a explicação sobre a struct, temos um map onde o tipo da chave é string e o tipo do valor é nosso `localCacheItem`. Para finalizar, temos um TTL (Time To Live) para definir após quanto tempo nossa entrada expirará.
+
+## Métodos
+
+Teremos quatro métodos: Get, Set, Clear e CleanExpired. Há algumas implementações em comum entre eles. Em cada método, começamos bloqueando antes de obter, definir ou limpar nossos dados, para evitar inconsistências entre execuções concorrentes. Quando o processo finaliza, usando `defer`, garantimos que o lock seja liberado.
+
+## O método Get
+
+Aqui tentamos recuperar nossos dados pela chave. Se o item não existir ou estiver expirado, retornamos `false` para o chamador. Caso contrário, retornamos a informação encontrada no cache.
+
+``` go
+func (c *LocalCache) Get(key string) (interface{}, bool) {
+   c.mu.RLock()
+   defer c.mu.RUnlock()
+  
+   item, exists := c.items[key]
+   if !exists {
+    return nil, false
+   }
+  
+   if time.Now().After(item.expiresAt) {
+    return nil, false
+   }
+  
+   return item.value, true
+}
+```
+
+## O método Set
+
+É bastante simples — criamos uma chave no nosso map, definindo o valor da chave com um tempo de expiração.
+
+``` go
+func (c *LocalCache) Set(key string, value interface{}) {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items[key] = &localCacheItem{
+    value:     value,
+    expiresAt: time.Now().Add(c.ttl),
+   }
+}
+```
+
+## O método Clear
+
+Aqui temos a opção de limpar nosso cache e resetar todas as informações dentro do map em memória. É como um reinício.
+
+``` go
+func (c *LocalCache) Clear() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items = make(map[string]*localCacheItem)
+}
+```
+
+## O método CleanExpired
+
+Este é um método muito importante. Não podemos simplesmente deixar todos os dados na memória sem controle. Se você tem um serviço que processa milhões de entradas, não vai querer manter tudo em memória. Por isso, definimos um tempo de expiração para remover todos os dados expirados da memória do serviço.
+
+``` go
+func (c *LocalCache) CleanExpired() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   now := time.Now()
+   for key, item := range c.items {
+    if now.After(item.expiresAt) {
+     delete(c.items, key)
+    }
+   }
+}
+```
+
+## A implementação completa
+
+Agora você pode ver toda a implementação.
+
+``` go
+package cache
+
+import (
+ "sync"
+ "time"
+)
+
+type localCacheItem struct {
+    value interface{}
+    expiresAt time.Time
+}
+
+type LocalCache struct {
+    mu sync.RWMutex
+    items map[string]*localCacheItem
+    ttl time.Duration
+}
+
+func New(ttl time.Duration) *LocalCache {
+   return &LocalCache{
+    items: make(map[string]*localCacheItem),
+    ttl:   ttl,
+   }
+}
+
+func (c *LocalCache) Get(key string) (interface{}, bool) {
+   c.mu.RLock()
+   defer c.mu.RUnlock()
+  
+   item, exists := c.items[key]
+   if !exists {
+    return nil, false
+   }
+  
+   if time.Now().After(item.expiresAt) {
+    return nil, false
+   }
+  
+   return item.value, true
+}
+
+func (c *LocalCache) Set(key string, value interface{}) {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items[key] = &localCacheItem{
+    value:     value,
+    expiresAt: time.Now().Add(c.ttl),
+   }
+}
+
+func (c *LocalCache) Clear() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   c.items = make(map[string]*localCacheItem)
+}
+
+func (c *LocalCache) CleanExpired() {
+   c.mu.Lock()
+   defer c.mu.Unlock()
+  
+   now := time.Now()
+   for key, item := range c.items {
+    if now.After(item.expiresAt) {
+     delete(c.items, key)
+    }
+   }
+}
+```
+
+## Conclusão
+
+Agora você pode ver como é simples implementar um cache local em Go e utilizá-lo nos seus serviços.

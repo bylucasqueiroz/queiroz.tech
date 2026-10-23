@@ -41,7 +41,7 @@ export default function MermaidDiagram({ chart }: { chart: string }) {
   return (
     <div
       ref={ref}
-      className="my-6 flex justify-center overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0D1117] p-4"
+      className="my-8 flex justify-center overflow-x-auto rounded-xl border border-line bg-surface p-4"
     />
   )
 }
