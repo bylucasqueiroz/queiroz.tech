@@ -88,22 +88,13 @@ export async function renderOgCover({ title, motif, category, lang }: OgCoverOpt
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 12,
-                background: "#FFFFFF",
-                color: background,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "Geist",
-                fontSize: 18,
-              }}
-            >
-              LQ
-            </div>
+            {/* Site mark (components/logo.tsx) inverted: white tile, drawing in the category color. */}
+            <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#FFFFFF" />
+              <circle cx="13" cy="12.5" r="6.2" stroke={background} strokeWidth="2.6" />
+              <path d="M13 18.7V24H20" stroke={background} strokeWidth="2.6" strokeLinejoin="round" />
+              <rect x="21" y="20.5" width="7" height="7" rx="1.6" fill={background} fillOpacity="0.45" />
+            </svg>
             <div style={{ fontFamily: "Geist", fontSize: 22, opacity: 0.9 }}>
               {categoryLabel(category)}
             </div>
