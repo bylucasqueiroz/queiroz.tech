@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation"
-import { posts } from "@/.velite"
 import { isLang } from "@/lib/i18n"
 import { renderOgCover, ogSize } from "@/lib/og-cover"
-import { getPost } from "@/lib/posts"
+import { getPost, posts } from "@/lib/posts"
 
 export const size = ogSize
 export const contentType = "image/png"

@@ -7,6 +7,7 @@ export const site = {
     x: "https://x.com/bylucasqueiroz",
     youtube: "https://www.youtube.com/@bylucasqueiroz?sub_confirmation=1",
   },
+  youtubeChannelId: "UCIuz4gnxQi8r58veEt6fnpA",
 } as const
 
 export function absoluteUrl(path: string) {

@@ -35,16 +35,32 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-        <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-4 self-start rounded-2xl border border-line p-6">
+        <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-5 self-start rounded-2xl border border-line p-6 pb-3">
           <div className="flex items-center gap-3">
             <Avatar size="lg" />
             <div className="text-lg font-semibold">{site.name}</div>
           </div>
-          <nav aria-label="Social" className="flex flex-wrap gap-x-4 text-sm font-semibold">
-            <a href={site.social.linkedin} target="_blank" rel="noopener noreferrer" className="py-2 text-accent">LinkedIn</a>
-            <a href={site.social.github} target="_blank" rel="noopener noreferrer" className="py-2 text-accent">GitHub</a>
-            <a href={site.social.x} target="_blank" rel="noopener noreferrer" className="py-2 text-accent">X</a>
-            <a href={site.social.youtube} target="_blank" rel="noopener noreferrer" className="py-2 text-accent">YouTube</a>
+          <nav aria-label="Social">
+            <ul className="flex flex-col text-sm font-medium">
+              {[
+                { label: "LinkedIn", href: site.social.linkedin },
+                { label: "GitHub", href: site.social.github },
+                { label: "X", href: site.social.x },
+                { label: "YouTube", href: site.social.youtube },
+              ].map((link) => (
+                <li key={link.label} className="border-t border-line">
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-11 items-center justify-between text-fg transition-colors hover:text-accent"
+                  >
+                    {link.label}
+                    <span aria-hidden="true" className="text-muted">↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </nav>
         </div>
       </section>

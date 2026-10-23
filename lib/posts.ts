@@ -1,7 +1,10 @@
-import { posts } from "@/.velite"
+import { posts as allPosts } from "@/.velite"
 import { dateLocale, type Lang } from "@/lib/i18n"
 
-export type Post = (typeof posts)[number]
+export type Post = (typeof allPosts)[number]
+
+/** Drafts (`draft: true`) show up in `bun run dev` only; production builds leave them out. */
+export const posts = allPosts.filter((post) => !post.draft || process.env.NODE_ENV !== "production")
 
 export const categories = {
   "system-design": { label: "System Design" },
@@ -53,6 +56,29 @@ export function getPost(lang: Lang, category: string, slug: string) {
 export function getTranslation(post: Post) {
   const other: Lang = post.lang === "pt" ? "en" : "pt"
   return getPost(other, post.category, post.slug)
+}
+
+/**
+ * Pages in `lang` that have no counterpart in the other language, mapped to the closest page that
+ * does: an untranslated post goes to its category (or the blog), a category with no posts there
+ * goes to the blog. The language switch uses this instead of sending people to a 404.
+ */
+export function getLanguageFallbacks(lang: Lang): Record<string, string> {
+  const other: Lang = lang === "pt" ? "en" : "pt"
+  const hasCategory = (category: Category) => getPostsByCategory(other, category).length > 0
+  const fallbacks: Record<string, string> = {}
+
+  for (const category of Object.keys(categories) as Category[]) {
+    if (getPostsByCategory(lang, category).length > 0 && !hasCategory(category)) {
+      fallbacks[`/${lang}/blog/${category}`] = `/${other}/blog`
+    }
+  }
+  for (const post of getPosts(lang)) {
+    if (getTranslation(post)) continue
+    fallbacks[post.url] =
+      isCategory(post.category) && hasCategory(post.category) ? `/${other}/blog/${post.category}` : `/${other}/blog`
+  }
+  return fallbacks
 }
 
 export function getSeries(lang: Lang, id: string | undefined) {

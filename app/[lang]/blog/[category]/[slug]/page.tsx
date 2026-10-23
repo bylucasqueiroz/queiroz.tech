@@ -1,7 +1,7 @@
+import "katex/dist/katex.min.css"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { posts } from "@/.velite"
 import Cover from "@/components/cover"
 import { Mdx } from "@/components/mdx-components"
 import { Avatar, PostGrid, categoryText } from "@/components/post-blocks"
@@ -14,6 +14,7 @@ import {
   getRelated,
   getSeries,
   getTranslation,
+  posts,
 } from "@/lib/posts"
 import { personJsonLd, pageMetadata } from "@/lib/seo"
 import { absoluteUrl, site } from "@/lib/site"

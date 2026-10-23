@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next"
-import { posts } from "@/.velite"
 import { htmlLang, locales } from "@/lib/i18n"
-import { categories, getPostsByCategory, getTranslation, type Category } from "@/lib/posts"
+import { categories, getPostsByCategory, getTranslation, type Category, posts } from "@/lib/posts"
 import { absoluteUrl } from "@/lib/site"
 
 function bothLanguages(path: string) {

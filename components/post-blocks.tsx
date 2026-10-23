@@ -31,7 +31,7 @@ export function SectionLabel({ id, children, action }: { id?: string; children: 
   )
 }
 
-export function CategoryLabel({ category, className = "" }: { category: string; className?: string }) {
+function CategoryLabel({ category, className = "" }: { category: string; className?: string }) {
   return (
     <span className={`text-sm font-semibold ${categoryText[category] ?? "text-accent"} ${className}`}>
       {categoryLabel(category)}
@@ -57,7 +57,7 @@ export function Avatar({ size = "md" }: { size?: keyof typeof avatarSizes }) {
 }
 
 /** Grid card: cover, category, title, description, date. */
-export function PostCard({ post }: { post: Post }) {
+function PostCard({ post }: { post: Post }) {
   const t = getDictionary(post.lang)
   return (
     <Link href={post.url} className="group flex min-w-0 flex-col gap-3.5">
@@ -71,7 +71,7 @@ export function PostCard({ post }: { post: Post }) {
       <span className="text-[21px] font-bold leading-tight tracking-tight text-fg group-hover:text-accent">
         {post.title}
       </span>
-      <span className="text-[15px] leading-relaxed text-muted">{post.description}</span>
+      <span className="line-clamp-3 text-[15px] leading-relaxed text-muted">{post.description}</span>
       <span className="text-[13px] text-muted">
         {formatDate(post.date, post.lang)} · {t.post.readingTime(post.metadata.readingTime)}
       </span>
@@ -80,7 +80,7 @@ export function PostCard({ post }: { post: Post }) {
 }
 
 /** Compact row with a small cover, used beside the featured post. */
-export function PostRow({ post }: { post: Post }) {
+function PostRow({ post }: { post: Post }) {
   return (
     <Link href={post.url} className="group flex items-start gap-4 border-b border-line pb-5">
       <div className="w-[136px] shrink-0">
@@ -127,7 +127,7 @@ export function FeaturedSection({ lead, side, label }: { lead: Post; side: Post[
             <span className="text-[clamp(26px,3vw,36px)] font-bold leading-[1.15] tracking-tight text-fg group-hover:text-accent">
               {lead.title}
             </span>
-            <span className="max-w-[60ch] text-[17px] leading-relaxed text-muted">{lead.description}</span>
+            <span className="line-clamp-3 max-w-[60ch] text-[17px] leading-relaxed text-muted">{lead.description}</span>
             <span className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-muted">
               <Avatar size="sm" />
               <span className="font-semibold text-fg">{site.name}</span>
@@ -147,10 +147,15 @@ export function FeaturedSection({ lead, side, label }: { lead: Post; side: Post[
   )
 }
 
+/** Most cards the series band shows on the blog before linking to the full series. */
+const SERIES_BAND_MAX = 4
+
 export function SeriesBand({ lang, id }: { lang: Lang; id: string }) {
   const t = getDictionary(lang)
   const entry = getSeries(lang, id)
   if (!entry || entry.posts.length === 0) return null
+  // Long series show the first posts and a card to the full list, so the band keeps one row.
+  const shown = entry.posts.length > SERIES_BAND_MAX ? entry.posts.slice(0, SERIES_BAND_MAX - 1) : entry.posts
 
   return (
     <section
@@ -166,18 +171,29 @@ export function SeriesBand({ lang, id }: { lang: Lang; id: string }) {
         </h2>
         <p className="text-[15px] leading-relaxed text-muted">{entry.description}</p>
       </div>
-      <ol className="flex min-w-0 flex-[2_1_520px] flex-wrap gap-3">
-        {entry.posts.map((post, i) => (
-          <li key={post.url} className="min-w-0 flex-[1_1_180px]">
+      <ol className="grid min-w-0 flex-[2_1_520px] grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {shown.map((post, i) => (
+          <li key={post.url} className="min-w-0">
             <Link
               href={post.url}
               className="flex h-full flex-col gap-2.5 rounded-[14px] border border-line bg-bg p-[18px] text-fg transition-colors hover:border-accent"
             >
               <span className="text-[22px] font-semibold tabular-nums text-cat-sd">{String(i + 1).padStart(2, "0")}</span>
-              <span className="text-[15px] font-semibold leading-snug">{post.title}</span>
+              <span className="line-clamp-3 text-[15px] font-semibold leading-snug">{post.title}</span>
             </Link>
           </li>
         ))}
+        {shown.length < entry.posts.length && (
+          <li className="min-w-0">
+            <Link
+              href={`/${lang}/series#${id}`}
+              className="flex h-full flex-col gap-2.5 rounded-[14px] border border-dashed border-line p-[18px] text-fg transition-colors hover:border-accent"
+            >
+              <span className="text-[22px] font-semibold tabular-nums text-muted">+{entry.posts.length - shown.length}</span>
+              <span className="text-[15px] font-semibold leading-snug">{t.series.viewAll(entry.posts.length)} →</span>
+            </Link>
+          </li>
+        )}
       </ol>
     </section>
   )

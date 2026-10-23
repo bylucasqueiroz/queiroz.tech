@@ -15,6 +15,21 @@
   --color-cat-go: var(--cat-go);
   --color-cat-dotnet: var(--cat-dotnet);
 
+  /* Brand mark (logo and favicon): same indigo as the System Design covers, in both themes. */
+  --color-brand: #3730a3;
+  --color-brand-soft: #c7d2fe;
+
+  /* Code window on the home page: always dark, like a real editor, in both themes. */
+  --color-editor-bg: #0f131a;
+  --color-editor-chrome: #0b0e13;
+  --color-editor-line: #262b33;
+  --color-editor-fg: #e6e8eb;
+  --color-editor-muted: #6b7480;
+  --color-editor-gutter: #4a5260;
+  --color-editor-keyword: #a5b4fc;
+  --color-editor-string: #5eead4;
+  --color-editor-type: #f0abfc;
+
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
@@ -113,6 +128,7 @@
   padding: 1rem 1.25rem;
   font-size: 0.875rem;
   line-height: 1.7;
+  background: var(--surface);
 }
 
 [data-rehype-pretty-code-figure] code {
@@ -121,10 +137,6 @@
   border: 0;
   font-size: inherit;
   color: inherit;
-}
-
-[data-rehype-pretty-code-figure] pre {
-  background: var(--surface);
 }
 
 [data-rehype-pretty-code-figure] code span {

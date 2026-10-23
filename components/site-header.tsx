@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { getDictionary, type Lang } from "@/lib/i18n"
 import { site } from "@/lib/site"
+import Logo from "./logo"
 import NavLinks from "./nav-links"
 import GlobalSearch, { type SearchPost } from "./global-search"
 import LanguageSwitch from "./language-switch"
@@ -9,9 +10,10 @@ import ThemeToggle from "./theme-toggle"
 interface SiteHeaderProps {
   lang: Lang
   searchPosts: SearchPost[]
+  languageFallbacks: Record<string, string>
 }
 
-export default function SiteHeader({ lang, searchPosts }: SiteHeaderProps) {
+export default function SiteHeader({ lang, searchPosts, languageFallbacks }: SiteHeaderProps) {
   const t = getDictionary(lang)
 
   return (
@@ -19,9 +21,7 @@ export default function SiteHeader({ lang, searchPosts }: SiteHeaderProps) {
       {/* On phones the menu drops to its own row so logo and tools share the first one. */}
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-8 gap-y-1 px-6 py-3.5">
         <Link href={`/${lang}`} className="flex min-h-11 items-center gap-2.5 text-fg">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-fg text-xs font-bold text-bg">
-            LQ
-          </span>
+          <Logo className="size-8 shrink-0" />
           <span className="text-base font-semibold tracking-tight">{site.name}</span>
         </Link>
         <div className="order-3 -ml-3 w-full sm:order-none sm:ml-0 sm:w-auto">
@@ -40,7 +40,12 @@ export default function SiteHeader({ lang, searchPosts }: SiteHeaderProps) {
             posts={searchPosts}
             labels={t.search}
           />
-          <LanguageSwitch short={t.language.short} label={t.language.otherLabel} />
+          <LanguageSwitch
+            short={t.language.short}
+            label={t.language.otherLabel}
+            unavailableLabel={t.language.unavailable}
+            fallbacks={languageFallbacks}
+          />
           <ThemeToggle label={t.theme.toggle} />
         </div>
       </div>
