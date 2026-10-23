@@ -45,6 +45,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     description: post.description,
     available: translation ? [post.lang, translation.lang] : [post.lang],
     openGraph: { type: "article", publishedTime: post.date, authors: [site.name], tags: post.tags },
+    image: { url: `${post.url}/opengraph-image`, alt: post.title },
   })
 }
 

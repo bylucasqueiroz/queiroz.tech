@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { defaultLang, htmlLang, locales, type Lang } from "@/lib/i18n"
+import { COVER_HEIGHT, COVER_WIDTH } from "@/lib/covers"
 import { absoluteUrl, site } from "@/lib/site"
 
 interface PageMetadataOptions {
@@ -11,6 +12,8 @@ interface PageMetadataOptions {
   /** Languages the page exists in; defaults to every locale. */
   available?: readonly Lang[]
   openGraph?: Metadata["openGraph"]
+  /** Share image; defaults to the profile image at /{lang}/opengraph-image. */
+  image?: { url: string; alt: string }
 }
 
 /**
@@ -25,17 +28,16 @@ export function pageMetadata({
   description,
   available = locales,
   openGraph,
+  image = { url: `/${lang}/opengraph-image`, alt: site.name },
 }: PageMetadataOptions): Metadata {
   const url = `/${lang}${path}`
   const languages: Record<string, string> = Object.fromEntries(
     available.map((entry) => [htmlLang[entry], `/${entry}${path}`])
   )
   languages["x-default"] = `/${available.includes(defaultLang) ? defaultLang : lang}${path}`
-  // Posts ship their own opengraph-image next to the route; every other page shares /{lang}/opengraph-image,
-  // which Next drops as soon as a page sets `openGraph`, so it is listed explicitly.
-  const isArticle = openGraph && "type" in openGraph && openGraph.type === "article"
-  // An `images: undefined` key would also hide the post's own image, so the key is left out entirely.
-  const images = isArticle ? {} : { images: [`/${lang}/opengraph-image`] }
+  // Next drops file-based share images as soon as a page sets `openGraph`, so the image is always
+  // listed explicitly. Posts pass their own opengraph-image route with the title as alt text.
+  const images = { images: [{ ...image, width: COVER_WIDTH, height: COVER_HEIGHT, type: "image/png" }] }
 
   return {
     title,
