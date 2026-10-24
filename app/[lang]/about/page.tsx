@@ -114,6 +114,15 @@ export default async function AboutPage({ params }: PageProps<"/[lang]/about">) 
               <li key={item}>{item}</li>
             ))}
           </ul>
+          <a
+            href={site.social.credly}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-accent hover:underline"
+          >
+            {t.about.credly}
+            <span aria-hidden="true">↗</span>
+          </a>
         </div>
         <div>
           <h2 className="mb-3 text-sm font-semibold text-muted">{t.about.awards}</h2>

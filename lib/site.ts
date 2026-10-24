@@ -6,6 +6,7 @@ export const site = {
     github: "https://github.com/bylucasqueiroz",
     x: "https://x.com/bylucasqueiroz",
     youtube: "https://www.youtube.com/@bylucasqueiroz?sub_confirmation=1",
+    credly: "https://www.credly.com/users/bylucasqueiroz",
   },
   youtubeChannelId: "UCIuz4gnxQi8r58veEt6fnpA",
 } as const

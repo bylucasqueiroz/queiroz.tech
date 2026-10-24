@@ -101,6 +101,7 @@ const pt = {
     experience: "Experiência",
     education: "Formação",
     certifications: "Certificações",
+    credly: "Ver selos no Credly",
     awards: "Reconhecimentos",
   },
   follow: {
@@ -204,6 +205,7 @@ const en: Dictionary = {
     experience: "Experience",
     education: "Education",
     certifications: "Certifications",
+    credly: "See badges on Credly",
     awards: "Recognition",
   },
   follow: {

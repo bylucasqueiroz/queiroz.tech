@@ -64,5 +64,5 @@ export const personJsonLd = {
   name: site.name,
   url: site.url,
   image: absoluteUrl("/profile.jpg"),
-  sameAs: [site.social.linkedin, site.social.github, site.social.x, site.social.youtube.split("?")[0]],
+  sameAs: [site.social.linkedin, site.social.github, site.social.x, site.social.youtube.split("?")[0], site.social.credly],
 }
