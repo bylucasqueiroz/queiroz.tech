@@ -1,7 +1,7 @@
 ---
-title: "Rate limiting, Throttling: aumentando a resiliência de sistemas distribuídos"
-description: "Neste artigo veremos como o Rate Limiting e o Throttling podem ser utilizados para aumentar a resiliência de sistemas distribuídos."
-date: "2026-10-23"
+title: "Rate Limiting e Throttling: rejeitar ou desacelerar?"
+description: "Rate Limiting rejeita, Throttling desacelera: a diferença real entre os dois, onde entram Token Bucket e Leaky Bucket, e exemplos práticos em Go."
+date: "2026-10-30"
 tags: ["system design"]
 motif: "throttle"
 series: "resilience"
@@ -9,185 +9,179 @@ seriesOrder: 4
 draft: true
 ---
 
-<Image
-  alt={`post`}
-  src={`/images/resiliency-exponencial-backoff-in-practice/post.png`}
-  layout="fill"
-  className="!relative"
-/>
+Nós começamos uma série de artigos sobre padrões de resiliência. Vimos como o [Retry](/pt/blog/system-design/resiliency-why-retries-can-bring-down-your-system) recupera falhas transitórias, como o [Exponential Backoff e o Jitter](/pt/blog/system-design/resiliency-exponencial-backoff-in-practice) distribuem essas tentativas ao longo do tempo e como o [Circuit Breaker](/pt/blog/system-design/resiliency-circuit-breaker-when-should-you-stop-trying) decide quando é hora de parar de tentar.
 
-No artigo anterior vimos como o [Retry](/pt/blog/system-design/resiliency-why-retries-can-bring-down-your-system) permite aumentar a resiliência das aplicações realizando novas tentativas diante de falhas transitórias. Entretanto, também entendemos que uma implementação ingênua pode produzir exatamente o efeito contrário, aumentando a pressão sobre serviços já degradados e causando um Retry Storm.
+Até aqui, o foco sempre foi o lado de quem chama: como um cliente deve se comportar quando uma dependência falha. Neste artigo a perspectiva muda para o lado de quem recebe as chamadas: como um serviço se protege quando chega mais tráfego do que ele consegue processar.
 
-Neste artigo veremos como o Exponential Backoff funciona, por que ele reduz a sobrecarga em sistemas distribuídos e quais limitações ainda permanecem.
+É aí que entram dois conceitos bastante importantes quando falamos de resiliência e controle de tráfego: Rate Limiting e Throttling. A ideia deste artigo é entender o que cada um faz, qual a diferença real entre eles e como aplicá-los nas nossas aplicações.
 
-## Relembrando o problema
+## Rate Limiting
 
-No artigo anterior utilizamos como exemplo um ambiente executando aproximadamente 500 instâncias da aplicação. Em determinado momento, uma API externa começa a responder HTTP 503 (Service Unavailable). Todas as instâncias detectam a falha e imediatamente fazem uma nova tentativa de comunicação. Em poucos milissegundos, o serviço que já estava indisponível recebe outras 500 requisições. Como continua indisponível, novas tentativas são realizadas, elevando rapidamente o volume de requisições para milhares por segundo. Em vez de ajudar na recuperação do serviço, os clientes passam a amplificar sua indisponibilidade.
+Rate Limiting é uma técnica usada para restringir a quantidade de requisições que uma API pode receber. Definimos uma quantidade fixa de requisições que um cliente pode executar dentro de um determinado período de tempo, prevenindo abusos e protegendo os recursos dos nossos servidores.
 
-O problema não está em tentar novamente. O problema está em tentar novamente imediatamente, sem dar tempo suficiente para que a dependência consiga se recuperar. A própria documentação do Google Cloud classifica retries imediatos e sem estratégia de espera como um anti-pattern, justamente pelo potencial de amplificar indisponibilidades.
+Esse limite pode ser, por exemplo, de 1000 requisições por segundo, por minuto ou por dia. Quando ele é excedido, o cliente passa a receber um erro, geralmente `429 Too Many Requests`, informando que o limite foi atingido e que ele precisará aguardar até que sua cota seja restabelecida.
 
-<Image
-  alt={`replicas`}
-  src={`/images/resiliency-exponencial-backoff-in-practice/replicas.png`}
-  layout="fill"
-  className="!relative"
-/>
+Uma implementação simples de rate limiting já traz um grande ganho de resiliência para a API e seus recursos, e também protege contra ataques de agentes maliciosos, que passam a ser bloqueados. No entanto, é extremamente importante configurar o limite ideal para cada cenário, e esse limite deve estar alinhado com as regras de negócio do serviço.
 
-Supondo que nosso servidor se veja sem recurso suficiente para lidar com as requisições, por falta de memória ou CPU, gerado por um aumento abrupto de volume de requisições, e passa a retornar respostas indicando limitação de capacidade, como HTTP 429 (Too Many Requests) ou HTTP 503 (Service Unavailable). Esse comportamento de retentativas consecutivas aumenta ainda mais a pressão sobre a dependência, podendo degradar processos internos e prolongar ainda mais sua recuperação.
+### O cliente também precisa estar preparado
 
-## O que é Exponential Backoff?
+Se o limite configurado é de 1000 requisições por segundo e acontece um aumento repentino de tráfego, todas as requisições excedentes serão rejeitadas. Isso exige que o cliente que chama a aplicação esteja preparado e seja resiliente o suficiente para realizar novas tentativas, aplicando do lado dele as técnicas que vimos nos artigos anteriores, como [Retry com Exponential Backoff e Jitter](/pt/blog/system-design/resiliency-exponencial-backoff-in-practice).
 
-O Exponential Backoff é uma estratégia de Retry onde o intervalo entre as tentativas aumenta progressivamente após cada falha. Com isso, a pressão exercida sobre serviços degradados é reduzida, diminuindo as chances de um Retry Storm.
+{/* TODO: citar o header Retry-After, que diz ao cliente quanto tempo esperar antes de tentar de novo. */}
 
-Diferentemente de estratégias com intervalo fixo ou incremento linear, o Exponential Backoff aumenta exponencialmente o intervalo entre as tentativas.
+## Throttling
 
-No gráfico você consegue ter uma ideia de como funciona:
+Throttling é um mecanismo de controle de fluxo. Assim como o Rate Limiting, ele controla a quantidade de requisições que uma API recebe durante um período de tempo. A diferença está no que acontece quando o limite é atingido: em vez de simplesmente rejeitar, ele regula a velocidade das requisições, podendo enfileirar, atrasar ou processar de forma mais lenta, para manter o sistema dentro de uma capacidade sustentável sem necessariamente descartar a chamada.
 
-<Image
-  alt={`graph`}
-  src={`/images/resiliency-exponencial-backoff-in-practice/graph.png`}
-  layout="fill"
-  className="!relative"
-/>
+O objetivo é lidar com sobrecarga e tráfego inesperado mantendo o sistema estável, sem degradá-lo, e garantindo uma performance uniforme para os usuários. Como o volume que cada cliente consegue enviar é limitado temporariamente, os recursos não são consumidos por um único usuário em prejuízo de todos os outros. Desse modo, todos continuam acessando a API, sem serem prejudicados por uma parada completa do sistema.
 
-Perceba que o intervalo entre as tentativas deixa de ser constante. A cada nova falha, o tempo de espera aumenta exponencialmente, reduzindo gradualmente a frequência das novas tentativas. Quanto maior a sequência de falhas, maior será o intervalo até a próxima tentativa. Dessa forma, a dependência ganha mais tempo para recuperar sua capacidade antes de receber novas requisições.
+### Nem tudo são flores
 
-Na maioria das implementações é recomendado definir um limite máximo para o crescimento do Backoff ( Max Backoff ). Caso contrário, uma dependência que já tenha se recuperado poderá permanecer sem receber novas tentativas por um intervalo excessivamente longo. O Max Backoff define um limite superior para o intervalo entre tentativas, evitando tempos de espera excessivamente longos quando a dependência já voltou a responder normalmente.
+Implementar throttling também adiciona algumas limitações ao sistema. Durante picos de tráfego, o processamento fica mais lento e a latência aumenta, já que existe um limite configurado de chamadas para aquela API. No código, também aumentamos a complexidade da aplicação.
 
-Essa fórmula representa apenas uma implementação possível. Algumas bibliotecas utilizam pequenas variações no cálculo, mas todas seguem o mesmo princípio: aumentar progressivamente o intervalo entre as tentativas.
+## A diferença entre os dois
 
-$$
-\text{backoff} = \text{baseDelay} \times 2^{\text{tentativa}}
-$$
+No início, quando comecei a estudar essas duas ferramentas, eu entendia que elas tinham uma correlação direta e que eram obrigatoriamente usadas em conjunto. Mas as coisas não funcionam dessa forma.
 
-Embora a base 2 seja a implementação mais comum, diferentes algoritmos podem utilizar funções de crescimento distintas, desde que mantenham a característica de aumento exponencial.
+Rate Limiting é a política: você define um limite fixo, por exemplo 1000 requisições por segundo ou 100 por minuto, e quando esse limite é estourado, a requisição excedente é simplesmente rejeitada.
 
-Com isso, quanto maior o tempo de indisponibilidade da dependência, menor deve ser a frequência das novas tentativas. Desse modo, reduzimos a carga sobre um serviço degradado enquanto aumentamos as suas chances de se recuperar.
-## Comparando estratégias de Retry
+Throttling trata o excesso de maneira graciosa, sem que necessariamente todas as próximas requisições sejam rejeitadas. Elas podem ter um processamento mais lento, ou ser enviadas para uma fila de espera até que as condições sejam atendidas.
 
-Existem diferentes estratégias para definir o intervalo entre as tentativas de Retry. A principal diferença entre elas está justamente na forma como o tempo de espera evolui a cada nova falha. Enquanto o Retry Fixo mantém sempre o mesmo intervalo, o Retry Incremental aumenta esse intervalo de forma linear. Já o Exponential Backoff aumenta o tempo de espera exponencialmente, reduzindo progressivamente a pressão sobre serviços degradados.
+**A diferença real é a reação quando o limite é atingido: throttling suaviza e atrasa, rate limiting corta e rejeita.**
 
-As imagens abaixo ilustram como cada estratégia distribui as tentativas ao longo do tempo.
+|                  | Rate Limiting                            | Throttling                                   |
+| ---------------- | ---------------------------------------- | -------------------------------------------- |
+| Reação ao limite | Rejeita (`429`)                          | Atrasa, enfileira ou desacelera              |
+| Objetivo         | Política fixa de uso                     | Controle de fluxo gracioso                   |
+| Exemplo          | 100 req/s por usuário, 1000 req/s global | Reduzir a taxa quando o threshold é atingido |
 
-### Intervalo Fixo
+{/* TODO: link do artigo do Kicks for Kicks. */}
 
-<Image
-  alt={`fixed-retry`}
-  src={`/images/resiliency-exponencial-backoff-in-practice/fixed-retry.png`}
-  layout="fill"
-  className="!relative"
-  />
+<Callout type="tip">
+Vale a leitura do artigo do Kicks for Kicks, que tem uma tabela explicando bem a diferença entre os dois e como eles se complementam.
+</Callout>
 
-### Intervalo Incremental
+## Dynamic Throttling e Adaptive Throttling
 
-<Image
-  alt={`incremental-retry`}
-  src={`/images/resiliency-exponencial-backoff-in-practice/incremental-retry.png`}
-  layout="fill"
-  className="!relative"
-  />
+{/* TODO: seção ainda em escrita. */}
 
-### Exponencial Backoff
+## Algoritmos: Token Bucket e Leaky Bucket
 
-<Image
-  alt={`exponential-backoff`}
-  src={`/images/resiliency-exponencial-backoff-in-practice/exponential-backoff.png`}
-  layout="fill"
-  className="!relative"
-  />
+Enquanto escrevia este artigo, percebi que algoritmos como Token Bucket e Leaky Bucket são frequentemente associados somente ao Rate Limiting. Eu entendia que, no momento em que escolhêssemos um desses algoritmos, estaríamos necessariamente falando de limite de taxa. Mas eles também podem ser utilizados para decidir quando o throttling deve acontecer.
 
-Conseguimos ver lado a lado como cada espera acontece.
+{/* TODO: explicar como cada algoritmo funciona (talvez com um diagrama). */}
 
-| Tentativa | Retry Fixo | Retry Incremental | Exponential Backoff |
-| --------- | ---------- | ----------------- | ------------------- |
-| 1         | 100ms      | 100ms             | 100ms               |
-| 2         | 100ms      | 200ms             | 200ms               |
-| 3         | 100ms      | 300ms             | 400ms               |
-| 4         | 100ms      | 400ms             | 800ms               |
-| 5         | 100ms      | 500ms             | 1600ms              |
+Por exemplo, se configuramos na nossa aplicação um Token Bucket com capacidade de 1000 e todos os tokens foram consumidos, nesse momento podemos aplicar políticas de throttling e reduzir a taxa de processamento da API, em vez de usar rate limiting e rejeitar todas as requisições seguintes.
 
-Perceba que o Exponential Backoff não reduz a quantidade de tentativas realizadas. Ele apenas distribui essas tentativas ao longo do tempo. Essa simples mudança reduz significativamente a pressão exercida sobre serviços degradados.
+O algoritmo é o mesmo. O que define se o resultado é rate limiting ou throttling é o comportamento que desejamos para a aplicação:
 
-## Implementação
+- **Rate Limiting** impõe políticas de uso bem definidas.
+- **Throttling** preserva a experiência do usuário sob alto volume de tráfego.
 
-A implementação do Exponential Backoff é extremamente simples. Na prática, a única diferença em relação a um Retry tradicional está na forma como o tempo de espera entre as tentativas é calculado.
+## Exemplos em Go
 
-Em uma estratégia de  Retry com intervalo fixo, todas as tentativas aguardam exatamente o mesmo período antes de serem executadas novamente.
+Os dois primeiros exemplos usam o pacote `golang.org/x/time/rate`, que implementa um Token Bucket. Repare que o limiter é o mesmo nos dois casos: só muda o que fazemos quando os tokens acabam.
+
+### Rate Limiting: rejeita quando o limite é atingido
 
 ```go
-delay := baseDelay
+import (
+	"net/http"
+
+	"golang.org/x/time/rate"
+)
+
+// 1000 requisições por segundo, com burst de 50
+var limiter = rate.NewLimiter(1000, 50)
+
+func rateLimitMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !limiter.Allow() {
+			http.Error(w, "too many requests", http.StatusTooManyRequests) // 429
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
 ```
 
-Em uma estratégia de  Retry com intervalo incremental,  o tempo de espera cresce linearmente.
+`Allow()` consome um token se houver. Se o bucket estiver vazio, a requisição é rejeitada na hora com `429`.
+
+### Throttling: espera e processa com atraso controlado
 
 ```go
-delay := baseDelay * time.Duration(retryCount)
+import (
+	"context"
+	"net/http"
+	"time"
+
+	"golang.org/x/time/rate"
+)
+
+var throttler = rate.NewLimiter(1000, 50)
+
+func throttleMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+
+		if err := throttler.Wait(ctx); err != nil {
+			http.Error(w, "server busy, try again later", http.StatusServiceUnavailable)
+			return
+		}
+		next.ServeHTTP(w, r) // processada com atraso controlado
+	})
+}
 ```
 
-Já utilizando  Exponential Backoff, o tempo de espera cresce exponencialmente a cada nova falha, respeitando um limite máximo definido pelo  Max Backoff .
+`Wait()` bloqueia até um token ficar disponível, então a requisição espera em vez de ser rejeitada. O timeout de 5 segundos evita que ela espere para sempre: passou disso, devolvemos `503`.
+
+### Worker pool: throttling por concorrência
 
 ```go
-backoff := baseDelay * time.Duration(1<<retryCount)
+package main
 
-if backoff > maxBackoff {
-	backoff = maxBackoff
+import (
+	"fmt"
+	"time"
+)
+
+type Job struct{ ID int }
+
+func worker(jobs <-chan Job, results chan<- string) {
+	for j := range jobs {
+		time.Sleep(100 * time.Millisecond) // ritmo controlado de processamento
+		results <- fmt.Sprintf("job %d processado", j.ID)
+	}
 }
 
-delay := backoff
-```
+func main() {
+	jobs := make(chan Job, 100)
+	results := make(chan string, 100)
 
-Perceba que poucas linhas de código são suficientes para alterar completamente o comportamento da aplicação. Em vez de executar novas tentativas em intervalos constantes, o sistema passa a reduzir gradualmente a frequência das requisições, diminuindo a pressão sobre dependências degradadas e aumentando suas chances de recuperação.
+	for w := 1; w <= 5; w++ {
+		go worker(jobs, results)
+	}
 
-## Limitações do Exponential Backoff
+	for i := 1; i <= 20; i++ {
+		jobs <- Job{ID: i} // se o buffer encher, quem envia bloqueia
+	}
+	close(jobs)
 
-Apesar dos benefícios, o Exponential Backoff não resolve todos os problemas relacionados ao Retry. Embora reduza significativamente a pressão sobre o serviço, o Exponential Backoff ainda possui uma limitação importante: clientes diferentes continuam calculando exatamente os mesmos intervalos entre tentativas. Como consequência, milhares de aplicações podem voltar a realizar novas requisições praticamente no mesmo instante, criando novos picos de tráfego.
-
-## Exponential Backoff + Jitter
-
-Embora o Exponential Backoff aumente o intervalo entre as tentativas, diferentes clientes continuam utilizando exatamente o mesmo cálculo. Isso faz com que milhares de aplicações realizem novas tentativas praticamente no mesmo instante.
-
-O Jitter acrescenta um efeito de aleatoriedade sobre o valor gerado pelo cálculo do exponential backoff, fazendo com que os valores de tempo produzidos não estejam dentro do mesmo milisegundo. Ao introduzir um pequeno componente aleatório sobre o tempo calculado, as tentativas deixam de acontecer simultaneamente, distribuindo naturalmente a carga ao longo do tempo.
-
-A imagem abaixo ilustra como as tentativas passam a ser distribuídas ao longo do tempo após a aplicação do Full Jitter.
-
-<Image
-  alt={`exponential-backoff-jitter`}
-  src={`/images/resiliency-exponencial-backoff-in-practice/exponential-backoff-jitter.png`}
-  layout="fill"
-  className="!relative"
-  />
-
-### Implementação do Full Jitter
-
-Assim como o Exponential Backoff exige apenas algumas linhas de código, adicionar o  Full Jitter  também é bastante simples. A diferença é que, em vez de utilizar exatamente o valor calculado pelo Backoff, sorteamos um tempo aleatório entre 0 (zero) e o valor máximo calculado.
-
-``` go
-backoff := baseDelay * time.Duration(1<<retryCount)
-
-if backoff > maxBackoff {
-	backoff = maxBackoff
+	for i := 1; i <= 20; i++ {
+		fmt.Println(<-results)
+	}
 }
-
-delay := time.Duration(rand.Int63n(int64(backoff)))
 ```
 
-Dessa forma, diferentes clientes passam a executar novas tentativas em instantes distintos, distribuindo naturalmente a carga sobre a dependência.
-
-## Os diferentes tipos de Jitter
-
-Existem diferentes estratégias para adicionar aleatoriedade ao cálculo do Backoff. As mais conhecidas são:
-
--  Full Jitter:  sorteia um valor aleatório entre 0 (zero) e o Backoff calculado. É a estratégia mais utilizada por reduzir significativamente a sincronização entre clientes.
--  Equal Jitter:  mantém parte do tempo de espera calculado e aplica aleatoriedade apenas sobre a outra metade, evitando tempos muito pequenos.
--  Decorrelated Jitter: utiliza o atraso anterior para calcular o próximo intervalo, produzindo tempos mais imprevisíveis e evitando sincronização entre clientes durante longos períodos.
-
-Neste artigo utilizamos o  Full Jitter, por ser a abordagem mais simples e também a recomendada em diversas documentações, como as da [AWS](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/).
+Aqui o limite não é de requisições por segundo, e sim de quantos jobs são processados ao mesmo tempo: no máximo 5, um por worker. O que passa disso espera no channel, e quando o buffer enche, quem envia fica bloqueado até um worker liberar espaço.
 
 ## Conclusão
 
-O Retry continua sendo um dos mecanismos mais importantes para lidar com falhas transitórias. Entretanto, como vimos neste artigo, a estratégia utilizada para definir o intervalo entre as tentativas faz toda a diferença. O Exponential Backoff reduz significativamente a pressão sobre sistemas degradados e hoje é amplamente utilizado em arquiteturas distribuídas modernas. Ainda assim, quando milhares de clientes executam o mesmo algoritmo simultaneamente, novos picos de tráfego podem surgir. É justamente esse cenário que motiva a utilização do Jitter.
+{/* TODO: revisar quando o texto estiver fechado. */}
+
+Rate Limiting e Throttling resolvem o mesmo problema, o excesso de tráfego, com reações diferentes. Rate Limiting corta e rejeita, impondo uma política de uso clara. Throttling suaviza e atrasa, preservando a experiência do usuário enquanto o sistema se mantém dentro da sua capacidade. Algoritmos como o Token Bucket servem aos dois: a escolha está no comportamento que queremos quando o limite é atingido.
 
 ## Referências
 
-- https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/retry-backoff.html
-- https://docs.cloud.google.com/storage/docs/retry-strategy
+{/* TODO: adicionar as referências, incluindo o artigo do Kicks for Kicks. */}
