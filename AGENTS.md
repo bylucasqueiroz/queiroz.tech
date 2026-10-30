@@ -23,8 +23,8 @@ no escuro.
 - `app/[lang]/`: todas as páginas ficam sob `/pt` ou `/en`. O layout raiz é `app/[lang]/layout.tsx`.
   - `page.tsx`: home em tela cheia, só apresentação: nome, frase, bio, botões "Ler o blog" e
     "Sobre mim", card do último vídeo do YouTube (`lib/youtube.ts`, feed público do canal, página
-    regenerada 1x por dia) e, à direita, a foto em retrato (`public/profile.jpg`). No celular a
-    foto fica abaixo do texto. Não coloque conteúdo do blog na home.
+    regenerada 1x por dia), tudo centralizado e sem foto (a foto fica no Sobre). Não coloque
+    conteúdo do blog na home.
   - `blog/`: índice com destaque, série e todos os posts. `blog/[category]/` e
     `blog/[category]/[slug]/`.
   - `series/`, `about/`, `feed.xml/`.
@@ -33,7 +33,6 @@ no escuro.
 - `lib/i18n.ts`: todos os textos de interface, em `pt` e `en`. Nada de texto fixo nos componentes.
 - `lib/posts.ts`: categorias, séries e consultas de posts.
 - `lib/covers.ts`, `lib/motifs.ts`, `lib/og-cover.tsx`, `components/cover.tsx`: capas dos posts.
-- `lib/career.ts`: experiência, formação, certificações e reconhecimentos do Sobre, em `pt` e `en`.
 - `lib/seo.ts`: `pageMetadata()` (canonical, hreflang com x-default, Open Graph) e o JSON-LD do autor.
 - `components/post-blocks.tsx`: blocos compartilhados (cards, grade de posts, destaque, série,
   `PageIntro`, `Avatar`).
@@ -138,14 +137,14 @@ própria nas capas de diagrama. O canvas de referência é https://claude.ai/art
   Principal `bg-fg text-bg`; secundário `border border-line`.
 - **Alvos de toque** de pelo menos 44px.
 - **Texto**: não use travessão (—) em textos do site. Prefira dois-pontos, vírgula ou ponto.
-- **Dados pessoais**: nome do empregador e cargo só aparecem na seção Experiência do Sobre
-  (`lib/career.ts`). Na home, bio, bloco do autor e metadados, nada de empresa nem cargo.
+- **Dados pessoais**: nome do empregador e cargo não aparecem no site (nem no Sobre, nem na home,
+  bio, bloco do autor ou metadados). A experiência profissional fica no LinkedIn.
   Telefone e e-mail nunca vão para o site.
 - Mudanças grandes de layout: proponha primeiro no canvas e implemente depois da aprovação.
 
 ## Idiomas e SEO
 
-- Todo texto novo entra em `lib/i18n.ts` (ou `lib/career.ts`) nos dois idiomas.
+- Todo texto novo entra em `lib/i18n.ts` nos dois idiomas.
 - Páginas novas: use `pageMetadata()` de `lib/seo.ts` no `generateMetadata`. Ela já define
   canonical, `hreflang` (com x-default para `pt`) e Open Graph com imagem.
 - Inclua a rota em `app/sitemap.ts`.
