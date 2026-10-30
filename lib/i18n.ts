@@ -39,23 +39,6 @@ const pt = {
     latestVideo: "Último vídeo no YouTube",
     watch: "Assistir →",
     youtubeChannel: "Canal no YouTube",
-    // Timeless on purpose: nothing here should need updating as posts, videos or jobs change.
-    code: {
-      label: "Lições de produção, em Go",
-      pkg: "producao",
-      lesson: "Lições de quem já foi acordado por um alerta às 3h.",
-      rules: [
-        ["Retry", "sempre com backoff e jitter"],
-        ["Timeout", "em tudo, inclusive no que nunca falha"],
-        ["Deploy", "sexta-feira só com feature flag"],
-        ["Logs", "estruturados, antes do incidente"],
-      ],
-      incident: "incidente",
-      incidentType: "Incidente",
-      cause: "Causa",
-      steps: ["não é o banco de dados", "é o banco de dados", "é DNS"],
-      blameless: "sem culpados",
-    },
   },
   blog: {
     title: "Blog",
@@ -144,22 +127,6 @@ const en: Dictionary = {
     latestVideo: "Latest YouTube video",
     watch: "Watch →",
     youtubeChannel: "YouTube channel",
-    code: {
-      label: "Production lessons, in Go",
-      pkg: "production",
-      lesson: "Lessons from being paged at 3 a.m.",
-      rules: [
-        ["Retry", "always with backoff and jitter"],
-        ["Timeout", "on everything, even what never fails"],
-        ["Deploy", "Fridays only behind a feature flag"],
-        ["Logs", "structured, before the incident"],
-      ],
-      incident: "incident",
-      incidentType: "Incident",
-      cause: "Cause",
-      steps: ["it's not the database", "it's the database", "it's DNS"],
-      blameless: "blameless",
-    },
   },
   blog: {
     title: "Blog",

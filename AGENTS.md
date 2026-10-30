@@ -23,10 +23,8 @@ no escuro.
 - `app/[lang]/`: todas as páginas ficam sob `/pt` ou `/en`. O layout raiz é `app/[lang]/layout.tsx`.
   - `page.tsx`: home em tela cheia, só apresentação: nome, frase, bio, botões "Ler o blog" e
     "Sobre mim", card do último vídeo do YouTube (`lib/youtube.ts`, feed público do canal, página
-    regenerada 1x por dia) e, à direita, a janela de código `components/code-window.tsx` com
-    "lições de produção" em Go (`home.code` em `lib/i18n.ts`). Esse texto é atemporal de propósito:
-    nada de stack, cargo, empresa ou números que precisem de atualização. Não coloque conteúdo do
-    blog na home.
+    regenerada 1x por dia) e, à direita, a foto em retrato (`public/profile.jpg`). No celular a
+    foto fica abaixo do texto. Não coloque conteúdo do blog na home.
   - `blog/`: índice com destaque, série e todos os posts. `blog/[category]/` e
     `blog/[category]/[slug]/`.
   - `series/`, `about/`, `feed.xml/`.
@@ -129,8 +127,9 @@ própria nas capas de diagrama. O canvas de referência é https://claude.ai/art
 - **Grade blueprint** (`GridBackdrop`, `.bg-blueprint`): página inteira na home; faixa que some
   aos poucos no topo das páginas de entrada (todas que usam `PageIntro`: Blog, categorias, Séries,
   Sobre). Posts não têm grade.
-- **Marca**: o símbolo é um Q cuja perna vira um conector até uma caixa de serviço, em índigo
-  (`--color-brand`, igual às capas de System Design). O mesmo desenho está em `app/icon.svg`
+- **Marca**: o símbolo é um prompt de terminal, "q_": um q desenhado em traço (não é fonte) e o
+  cursor em verde-água, sobre um quadrado escuro (`--color-brand`, `--color-brand-fg`,
+  `--color-brand-cursor`), igual nos dois temas. O mesmo desenho está em `app/icon.svg`
   (favicon), `app/apple-icon.png` (180×180, cantos retos), `components/logo.tsx` (header) e,
   invertido (fundo branco, traço na cor da categoria), em `lib/og-cover.tsx`. Mudou um, mude todos.
 - **Header e rodapé**: um só de cada para todas as páginas (`site-header.tsx`, `site-footer.tsx`).

@@ -2,11 +2,11 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import CodeWindow, { type CodeLine } from "@/components/code-window"
 import GridBackdrop from "@/components/grid-backdrop"
 import { getDictionary, htmlLang, isLang } from "@/lib/i18n"
 import { pageMetadata, personJsonLd } from "@/lib/seo"
 import { site } from "@/lib/site"
+import profile from "@/public/profile.jpg"
 import { getYouTubeVideos } from "@/lib/youtube"
 
 export async function generateMetadata({ params }: PageProps<"/[lang]">): Promise<Metadata> {
@@ -46,8 +46,8 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     <section className="flex flex-1 items-center py-12 sm:py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <GridBackdrop variant="full" />
-      <div className="flex w-full flex-wrap items-center gap-x-16 gap-y-12">
-        <div className="flex min-w-0 flex-[1_1_420px] flex-col">
+      <div className="flex w-full flex-wrap items-center gap-x-[72px] gap-y-10">
+        <div className="flex min-w-0 flex-[1_1_480px] flex-col">
           <h1 className="mb-4 text-[clamp(44px,6vw,76px)] font-bold leading-[0.98] tracking-[-0.045em]">{site.name}</h1>
           <p className="mb-4 text-[clamp(20px,2.2vw,26px)] leading-snug text-fg">{t.home.title}</p>
           <p className="mb-8 max-w-[48ch] text-[17px] leading-relaxed text-muted">{t.home.bio}</p>
@@ -95,42 +95,15 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           )}
         </div>
 
-        <CodeWindow
-          label={t.home.code.label}
-          file={`${t.home.code.pkg}.go`}
-          secondaryFile="README.md"
-          command={`$ go test ./${t.home.code.pkg}`}
-          status="ok"
-          lines={lessonsCode(t.home.code)}
-          className="min-w-0 max-w-[620px] flex-[1_1_520px]"
+        <Image
+          src={profile}
+          alt={site.name}
+          priority
+          sizes="(min-width: 960px) 400px, 100vw"
+          className="aspect-[4/5] w-full min-w-0 max-w-[400px] flex-[0_1_400px] rounded-[20px] border border-line object-cover"
         />
       </div>
     </section>
   )
 }
 
-type CodeCopy = ReturnType<typeof getDictionary>["home"]["code"]
-
-/** Production lessons as Go: timeless on purpose, so the home never needs content updates. */
-function lessonsCode(copy: CodeCopy): CodeLine[] {
-  const k = (text: string) => ({ kind: "keyword" as const, text })
-  const s = (text: string) => ({ kind: "string" as const, text: `"${text}"` })
-  const ty = (text: string) => ({ kind: "type" as const, text })
-  const c = (text: string) => ({ kind: "comment" as const, text })
-  const p = (text: string) => ({ kind: "plain" as const, text })
-  const width = Math.max(...copy.rules.map(([name]) => name.length))
-
-  return [
-    [k("package"), p(` ${copy.pkg}`)],
-    [],
-    [c(`// ${copy.lesson}`)],
-    [k("const"), p(" (")],
-    ...copy.rules.map(([name, value]) => [p(`    ${name.padEnd(width)} = `), s(value)]),
-    [p(")")],
-    [],
-    [k("func"), p(` Debug(${copy.incident} `), ty(copy.incidentType), p(") "), ty(copy.cause), p(" {")],
-    ...copy.steps.map((step, i) => [c(`    // ${i + 1}. ${step}`)]),
-    [p("    "), k("return"), p(` ${copy.incident}.Postmortem() `), c(`// ${copy.blameless}`)],
-    [p("}")],
-  ]
-}

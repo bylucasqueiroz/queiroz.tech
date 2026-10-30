@@ -91,9 +91,9 @@ export async function renderOgCover({ title, motif, category, lang }: OgCoverOpt
             {/* Site mark (components/logo.tsx) inverted: white tile, drawing in the category color. */}
             <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
               <rect width="32" height="32" rx="8" fill="#FFFFFF" />
-              <circle cx="13" cy="12.5" r="6.2" stroke={background} strokeWidth="2.6" />
-              <path d="M13 18.7V24H20" stroke={background} strokeWidth="2.6" strokeLinejoin="round" />
-              <rect x="21" y="20.5" width="7" height="7" rx="1.6" fill={background} fillOpacity="0.45" />
+              <circle cx="11.6" cy="16.2" r="4.4" stroke={background} strokeWidth="2.4" />
+              <path d="M16 11.2V26.4" stroke={background} strokeWidth="2.4" />
+              <rect x="19.2" y="19.4" width="6.8" height="2.6" rx="0.6" fill={background} fillOpacity="0.45" />
             </svg>
             <div style={{ fontFamily: "Geist", fontSize: 22, opacity: 0.9 }}>
               {categoryLabel(category)}

@@ -1,11 +1,11 @@
-/** Site mark: a Q whose tail is a diagram connector to a service box. Same drawing as app/icon.svg. */
+/** Site mark: a terminal prompt, "q" and a cursor. Same drawing as app/icon.svg. */
 export default function Logo({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className}>
       <rect width="32" height="32" rx="8" className="fill-brand" />
-      <circle cx="13" cy="12.5" r="6.2" stroke="white" strokeWidth="2.6" />
-      <path d="M13 18.7V24H20" stroke="white" strokeWidth="2.6" strokeLinejoin="round" />
-      <rect x="21" y="20.5" width="7" height="7" rx="1.6" className="fill-brand-soft" />
+      <circle cx="11.6" cy="16.2" r="4.4" strokeWidth="2.4" className="stroke-brand-fg" />
+      <path d="M16 11.2V26.4" strokeWidth="2.4" className="stroke-brand-fg" />
+      <rect x="19.2" y="19.4" width="6.8" height="2.6" rx="0.6" className="fill-brand-cursor" />
     </svg>
   )
 }

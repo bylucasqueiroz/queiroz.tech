@@ -15,20 +15,10 @@
   --color-cat-go: var(--cat-go);
   --color-cat-dotnet: var(--cat-dotnet);
 
-  /* Brand mark (logo and favicon): same indigo as the System Design covers, in both themes. */
-  --color-brand: #3730a3;
-  --color-brand-soft: #c7d2fe;
-
-  /* Code window on the home page: always dark, like a real editor, in both themes. */
-  --color-editor-bg: #0f131a;
-  --color-editor-chrome: #0b0e13;
-  --color-editor-line: #262b33;
-  --color-editor-fg: #e6e8eb;
-  --color-editor-muted: #6b7480;
-  --color-editor-gutter: #4a5260;
-  --color-editor-keyword: #a5b4fc;
-  --color-editor-string: #5eead4;
-  --color-editor-type: #f0abfc;
+  /* Brand mark (logo and favicon): a dark terminal tile, the same in both themes. */
+  --color-brand: #0f131a;
+  --color-brand-fg: #e6e8eb;
+  --color-brand-cursor: #5eead4;
 
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
